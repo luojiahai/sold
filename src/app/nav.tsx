@@ -3,11 +3,50 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const ICON = { fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+
 const LINKS = [
-  { href: "/", label: "Feed" },
-  { href: "/runs", label: "Runs" },
-  { href: "/keywords", label: "Keywords" },
-  { href: "/sessions", label: "Sessions" },
+  {
+    href: "/",
+    label: "Feed",
+    icon: (
+      <svg viewBox="0 0 24 24" {...ICON} aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    ),
+  },
+  {
+    href: "/runs",
+    label: "Runs",
+    icon: (
+      <svg viewBox="0 0 24 24" {...ICON} aria-hidden="true">
+        <path d="M3 12a9 9 0 1 0 3-6.7" />
+        <path d="M3 4v5h5" />
+      </svg>
+    ),
+  },
+  {
+    href: "/keywords",
+    label: "Keywords",
+    icon: (
+      <svg viewBox="0 0 24 24" {...ICON} aria-hidden="true">
+        <path d="M5 3v18M19 3v18M3 8.5h18M3 15.5h18" />
+      </svg>
+    ),
+  },
+  {
+    href: "/sessions",
+    label: "Sessions",
+    icon: (
+      <svg viewBox="0 0 24 24" {...ICON} aria-hidden="true">
+        <rect x="3" y="10.5" width="18" height="10.5" rx="2" />
+        <path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5" />
+      </svg>
+    ),
+  },
 ];
 
 export function Nav() {
@@ -23,6 +62,7 @@ export function Nav() {
             link.href === "/" ? pathname === "/" : pathname.startsWith(link.href)
           }
         >
+          {link.icon}
           {link.label}
         </Link>
       ))}

@@ -28,13 +28,19 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
 
   return (
     <>
-      <p className="small muted" style={{ margin: "0 0 6px" }}>
+      <p className="backlink">
         <Link href="/runs">← All runs</Link>
       </p>
-      <h1>Run {run.id.slice(0, 8)}</h1>
-      <p className="lede">
-        {run.collectorId} → {run.detectorId} · {run.sinceDate} to {run.untilDate}
-      </p>
+      <div className="page-head">
+        <h1>
+          Run <span className="mono">{run.id.slice(0, 8)}</span>
+        </h1>
+        <p className="lede">
+          <span className="mono">{run.collectorId}</span> →{" "}
+          <span className="mono">{run.detectorId}</span> · {run.sinceDate} to{" "}
+          {run.untilDate}
+        </p>
+      </div>
 
       {isStalled(run) && (
         <div className="banner warn">
@@ -46,7 +52,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       )}
 
       {["pending", "collecting", "detecting"].includes(run.status) && (
-        <form action={cancelRun} style={{ marginBottom: 16 }}>
+        <form action={cancelRun} style={{ marginBottom: 12 }}>
           <input type="hidden" name="runId" value={run.id} />
           <button type="submit">Stop this run</button>
         </form>
@@ -72,24 +78,24 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
                 <tr>
                   <th>Term</th>
                   <th>Strategy</th>
-                  <th>Pages</th>
-                  <th>Seen</th>
-                  <th>In range</th>
-                  <th>New</th>
+                  <th className="num">Pages</th>
+                  <th className="num">Seen</th>
+                  <th className="num">In range</th>
+                  <th className="num">New</th>
                   <th>Outcome</th>
                 </tr>
               </thead>
               <tbody>
                 {terms.map((term) => (
                   <tr key={term.id}>
-                    <td>
+                    <td className="nowrap">
                       <b>{term.kind === "hashtag" ? `#${term.term}` : term.term}</b>
                     </td>
-                    <td className="small mono">{term.strategy}</td>
-                    <td>{term.pagesFetched}</td>
-                    <td>{term.postsSeen}</td>
-                    <td>{term.postsInRange}</td>
-                    <td>{term.postsNew}</td>
+                    <td className="mono">{term.strategy}</td>
+                    <td className="num">{term.pagesFetched}</td>
+                    <td className="num">{term.postsSeen}</td>
+                    <td className="num">{term.postsInRange}</td>
+                    <td className="num">{term.postsNew}</td>
                     <td>
                       <span className={`tag ${terminationTone(term.terminationReason)}`}>
                         {TERMINATION_LABELS[term.terminationReason ?? ""] ??
@@ -110,7 +116,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       )}
 
       <h2>Configuration</h2>
-      <pre className="log mono" style={{ maxHeight: 260 }}>
+      <pre className="log" style={{ maxHeight: 260 }}>
         {JSON.stringify(run.config, null, 2)}
       </pre>
     </>

@@ -38,7 +38,7 @@ Seed terms ──▶ COLLECTOR ──▶ normalised posts ──▶ DETECTOR ─
 
   > Don't route this through instagrapi's client: it targets the mobile API at `i.instagram.com`, which rejects browser `sessionid` cookies and invalidates the session when you try. instagrapi is used only for `extract_media_v1`.
 - **Detector** — `src/detectors/`. `claude-cli` batches posts through `claude -p --output-format json`. Multimodal and API detectors are declared placeholders.
-- **Web** — `src/app/`. Feed, Runs, Keywords, Sessions.
+- **Web** — `src/app/`. Feed, Runs, Keywords, Sessions. Dark-first; the theme switch at the bottom of the sidebar offers system / light / dark and stores the choice in a cookie, so the server renders the right theme on first paint. A live harvest pins a status strip above every page.
 
 ## Two things worth knowing
 

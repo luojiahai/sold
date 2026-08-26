@@ -24,60 +24,56 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
   const sightings = db.select().from(runPosts).where(eq(runPosts.postId, id)).all();
   const latest = verdicts[0];
+  const verified = latest?.isListing && latest?.isAustralia;
 
   return (
     <>
-      <p className="small muted" style={{ margin: "0 0 6px" }}>
+      <p className="backlink">
         <Link href="/">← Feed</Link>
       </p>
-      <h1>@{post.authorHandle ?? "unknown"}</h1>
-      <p className="lede">
-        {relativeTime(post.postedAt)} ·{" "}
-        <a href={post.url} target="_blank" rel="noopener noreferrer">
-          View on Instagram ↗
-        </a>
-      </p>
+      <div className="page-head">
+        <h1>@{post.authorHandle ?? "unknown"}</h1>
+        <p className="lede">
+          {relativeTime(post.postedAt)} ·{" "}
+          <a href={post.url} target="_blank" rel="noopener noreferrer">
+            View on Instagram ↗
+          </a>
+        </p>
+      </div>
 
-      <div className="grid" style={{ gridTemplateColumns: "300px 1fr", gap: 22, alignItems: "start" }}>
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="detail">
+        <div className="media">
           {post.thumbnailPath ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={`/api/media/${post.thumbnailPath}`}
-              alt=""
-              style={{ width: "100%", display: "block" }}
-            />
+            <img src={`/api/media/${post.thumbnailPath}`} alt="" />
           ) : (
             <div className="no-thumb" style={{ aspectRatio: 1 }}>
               no thumbnail cached
             </div>
           )}
-          <div style={{ padding: 12 }} className="small muted">
+          <div className="facts">
             <div>{post.mediaType}</div>
             <div>
               {post.likeCount ?? "—"} likes · {post.commentCount ?? "—"} comments
             </div>
-            {post.locationName && <div>📍 {post.locationName}</div>}
+            {post.locationName && <div>Tagged {post.locationName}</div>}
           </div>
         </div>
 
         <div>
           {latest && (
-            <div className={`card`} style={{ marginBottom: 16 }}>
-              <div className="row" style={{ gap: 7, marginBottom: 10 }}>
+            <div className={`verdict ${verified ? "k-ok" : "k-bad"}`}>
+              <div className="row" style={{ gap: 4 }}>
                 <span className={`tag ${latest.isListing ? "ok" : "bad"}`}>
                   {latest.isListing ? "Is a listing" : "Not a listing"}
                 </span>
                 <span className={`tag ${latest.isAustralia ? "ok" : "bad"}`}>
                   {latest.isAustralia ? "In Australia" : "Not Australia"}
                 </span>
-                <span className="tag">{latest.confidence}% confidence</span>
+                <span className="tag mono">{latest.confidence}% confidence</span>
                 {latest.viaFallback && <span className="tag warn">per-post fallback</span>}
-              </div>
-              <p style={{ margin: "0 0 12px" }}>{latest.reason}</p>
-              <div className="row" style={{ gap: 7 }}>
                 {latest.listingType && (
-                  <span className="tag accent">
+                  <span className="tag">
                     {LISTING_TYPE_LABELS[latest.listingType] ?? latest.listingType}
                   </span>
                 )}
@@ -87,21 +83,22 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                     {latest.state ? `, ${latest.state}` : ""}
                   </span>
                 )}
-                {latest.priceText && <span className="tag">{latest.priceText}</span>}
+                {latest.priceText && <span className="tag mono">{latest.priceText}</span>}
                 {latest.agency && <span className="tag">{latest.agency}</span>}
               </div>
+              <p>{latest.reason}</p>
             </div>
           )}
 
-          <h2 style={{ marginTop: 0 }}>Caption</h2>
-          <div className="card" style={{ whiteSpace: "pre-wrap", fontSize: 14 }}>
+          <h2 style={{ marginTop: latest ? undefined : 0 }}>Caption</h2>
+          <div className="caption-block">
             {post.text || <em className="muted">No caption</em>}
           </div>
 
           {post.hashtags.length > 0 && (
-            <div className="row" style={{ gap: 6, marginTop: 12 }}>
+            <div className="row" style={{ gap: 4, marginTop: 12 }}>
               {post.hashtags.map((tag) => (
-                <span key={tag} className="tag">
+                <span key={tag} className="tag mono">
                   #{tag}
                 </span>
               ))}
@@ -118,21 +115,29 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                   <th>Model</th>
                   <th>Listing</th>
                   <th>AU</th>
-                  <th>Conf.</th>
-                  <th>Cost</th>
+                  <th className="num">Conf.</th>
+                  <th className="num">Cost</th>
                   <th>Reason</th>
                 </tr>
               </thead>
               <tbody>
                 {verdicts.map((verdict) => (
                   <tr key={verdict.id}>
-                    <td className="small">{relativeTime(verdict.createdAt)}</td>
-                    <td className="small mono">{verdict.detectorId}</td>
-                    <td className="small mono">{verdict.model ?? "—"}</td>
-                    <td>{verdict.isListing ? "yes" : "no"}</td>
-                    <td>{verdict.isAustralia ? "yes" : "no"}</td>
-                    <td>{verdict.confidence}%</td>
-                    <td className="small">{money(verdict.costUsd ?? 0)}</td>
+                    <td className="nowrap">{relativeTime(verdict.createdAt)}</td>
+                    <td className="mono">{verdict.detectorId}</td>
+                    <td className="mono">{verdict.model ?? "—"}</td>
+                    <td>
+                      <span className={`tag ${verdict.isListing ? "ok" : "bad"}`}>
+                        {verdict.isListing ? "yes" : "no"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`tag ${verdict.isAustralia ? "ok" : "bad"}`}>
+                        {verdict.isAustralia ? "yes" : "no"}
+                      </span>
+                    </td>
+                    <td className="num">{verdict.confidence}%</td>
+                    <td className="num">{money(verdict.costUsd ?? 0)}</td>
                     <td className="small">{verdict.reason}</td>
                   </tr>
                 ))}
@@ -154,12 +159,12 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
               <tbody>
                 {sightings.map((sighting) => (
                   <tr key={`${sighting.runId}-${sighting.term}`}>
-                    <td className="small">
+                    <td className="mono">
                       <Link href={`/runs/${sighting.runId}`}>{sighting.runId.slice(0, 8)}</Link>
                     </td>
-                    <td className="small">{sighting.term}</td>
-                    <td className="small mono">{sighting.strategy}</td>
-                    <td className="small">{sighting.isNew ? "yes" : "no"}</td>
+                    <td>{sighting.term}</td>
+                    <td className="mono">{sighting.strategy}</td>
+                    <td>{sighting.isNew ? "yes" : "no"}</td>
                   </tr>
                 ))}
               </tbody>

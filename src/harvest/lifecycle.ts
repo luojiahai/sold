@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { runEvents, runs } from "@/db/schema";
 import { nowIso } from "@/lib/id";
@@ -104,3 +104,29 @@ export const activeRunCount = (): number =>
     .from(runs)
     .where(inArray(runs.status, [...ACTIVE_STATUSES]))
     .get()?.n ?? 0;
+
+/**
+ * The run the shell's status strip tracks.
+ *
+ * Runs execute in-process one at a time, so "the active run" is unambiguous;
+ * the newest is taken anyway rather than assuming that invariant holds.
+ */
+export const activeRun = () =>
+  db
+    .select({
+      id: runs.id,
+      status: runs.status,
+      collectorId: runs.collectorId,
+      postsSeen: runs.postsSeen,
+      postsNew: runs.postsNew,
+      postsDetected: runs.postsDetected,
+      postsVerified: runs.postsVerified,
+      detectorCostUsd: runs.detectorCostUsd,
+      startedAt: runs.startedAt,
+      heartbeatAt: runs.heartbeatAt,
+    })
+    .from(runs)
+    .where(inArray(runs.status, [...ACTIVE_STATUSES]))
+    .orderBy(desc(runs.startedAt))
+    .limit(1)
+    .get() ?? null;
