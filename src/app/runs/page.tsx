@@ -14,8 +14,9 @@ export const dynamic = "force-dynamic";
 const STATUS_TONE: Record<string, string> = {
   completed: "ok",
   failed: "bad",
-  collecting: "accent",
-  detecting: "accent",
+  cancelled: "warn",
+  collecting: "live",
+  detecting: "live",
   pending: "",
 };
 
@@ -44,13 +45,15 @@ export default async function RunsPage() {
 
   return (
     <>
-      <h1>Harvest runs</h1>
-      <p className="lede">
-        A run collects posts for a date range, then classifies everything that
-        doesn&apos;t already have a verdict. Collector and detector are both
-        interchangeable — that&apos;s the architecture the prototype exists to
-        demonstrate.
-      </p>
+      <div className="page-head">
+        <h1>Harvest runs</h1>
+        <p className="lede">
+          A run collects posts for a date range, then classifies everything that
+          doesn&apos;t already have a verdict. Collector and detector are both
+          interchangeable — that&apos;s the architecture the prototype exists to
+          demonstrate.
+        </p>
+      </div>
 
       <NewRunForm
         collectors={collectors}
@@ -61,7 +64,10 @@ export default async function RunsPage() {
 
       <h2>History</h2>
       {history.length === 0 ? (
-        <div className="empty">No runs yet.</div>
+        <div className="empty">
+          <b>No runs yet.</b>
+          Start one above once a session is active.
+        </div>
       ) : (
         <div className="table-wrap">
           <table>
@@ -72,41 +78,39 @@ export default async function RunsPage() {
                 <th>Collector</th>
                 <th>Detector</th>
                 <th>Range</th>
-                <th>Seen</th>
-                <th>New</th>
-                <th>Verified</th>
-                <th>Cost</th>
+                <th className="num">Seen</th>
+                <th className="num">New</th>
+                <th className="num">Verified</th>
+                <th className="num">Cost</th>
                 <th />
               </tr>
             </thead>
             <tbody>
               {history.map((run) => (
                 <tr key={run.id}>
-                  <td>
+                  <td className="nowrap">
                     <Link href={`/runs/${run.id}`}>{relativeTime(run.startedAt)}</Link>
                   </td>
                   <td>
-                    <span className={`tag ${STATUS_TONE[run.status] ?? ""}`}>
-                      {run.status}
-                    </span>
-                    {isStalled(run) && (
-                      <div style={{ marginTop: 4 }}>
-                        <span className="tag warn">stalled</span>
-                      </div>
-                    )}
+                    <div className="row" style={{ gap: 4 }}>
+                      <span className={`tag ${STATUS_TONE[run.status] ?? ""}`}>
+                        {run.status}
+                      </span>
+                      {isStalled(run) && <span className="tag warn">stalled</span>}
+                    </div>
                   </td>
-                  <td className="small">{run.collectorId}</td>
-                  <td className="small">{run.detectorId}</td>
-                  <td className="small mono">
+                  <td className="mono">{run.collectorId}</td>
+                  <td className="mono">{run.detectorId}</td>
+                  <td className="mono">
                     {run.sinceDate} → {run.untilDate}
                   </td>
-                  <td>{run.postsSeen}</td>
-                  <td>{run.postsNew}</td>
-                  <td>{run.postsVerified}</td>
-                  <td className="small">{money(run.detectorCostUsd)}</td>
+                  <td className="num">{run.postsSeen.toLocaleString("en-AU")}</td>
+                  <td className="num">{run.postsNew.toLocaleString("en-AU")}</td>
+                  <td className="num">{run.postsVerified.toLocaleString("en-AU")}</td>
+                  <td className="num">{money(run.detectorCostUsd)}</td>
                   <td>
                     {["pending", "collecting", "detecting"].includes(run.status) && (
-                      <form action={cancelRun}>
+                      <form action={cancelRun} className="actions">
                         <input type="hidden" name="runId" value={run.id} />
                         <button className="small" type="submit">
                           Stop

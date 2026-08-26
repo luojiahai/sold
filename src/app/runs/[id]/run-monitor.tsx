@@ -82,11 +82,20 @@ export function RunMonitor({
 
   return (
     <>
-      <div className="row" style={{ marginBottom: 16 }}>
-        <span className={`tag ${run.status === "failed" ? "bad" : run.status === "completed" ? "ok" : "accent"}`}>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <span
+          className={`tag ${
+            run.status === "failed" ? "bad" : run.status === "completed" ? "ok" : "live"
+          }`}
+        >
           {run.status}
         </span>
-        {live && <span className="small muted">updating every 2s…</span>}
+        {live && (
+          <span className="small muted">
+            <span className="pulse" aria-hidden="true" style={{ display: "inline-block", marginRight: 6 }} />
+            updating every 2s
+          </span>
+        )}
       </div>
 
       {run.error && (
@@ -95,21 +104,21 @@ export function RunMonitor({
         </div>
       )}
 
-      <div className="stats" style={{ marginBottom: 20 }}>
+      <div className="stats">
         <div className="stat">
-          <b>{run.postsSeen}</b>
+          <b>{run.postsSeen.toLocaleString("en-AU")}</b>
           <span>Collected</span>
         </div>
         <div className="stat">
-          <b>{run.postsNew}</b>
+          <b>{run.postsNew.toLocaleString("en-AU")}</b>
           <span>New (deduped)</span>
         </div>
         <div className="stat">
-          <b>{run.postsDetected}</b>
+          <b>{run.postsDetected.toLocaleString("en-AU")}</b>
           <span>Detected</span>
         </div>
-        <div className="stat">
-          <b>{run.postsVerified}</b>
+        <div className="stat k-ok">
+          <b>{run.postsVerified.toLocaleString("en-AU")}</b>
           <span>AU listings</span>
         </div>
         <div className="stat">
@@ -126,7 +135,7 @@ export function RunMonitor({
           events.map((event) => (
             <div key={event.id} className={`lvl-${event.level}`}>
               <time>{new Date(event.createdAt).toLocaleTimeString("en-AU", { hour12: false })}</time>
-              <span className="muted">[{event.phase}]</span>
+              <span className="phase">{event.phase}</span>
               <span>{event.message}</span>
             </div>
           ))

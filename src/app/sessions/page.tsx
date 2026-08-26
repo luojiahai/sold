@@ -20,12 +20,14 @@ export default async function SessionsPage() {
 
   return (
     <>
-      <h1>Platform sessions</h1>
-      <p className="lede">
-        The cookie collector authenticates as a burner Instagram account. Session death
-        is the most common way a run fails, so test before you crawl rather than
-        discovering it twenty minutes in.
-      </p>
+      <div className="page-head">
+        <h1>Platform sessions</h1>
+        <p className="lede">
+          The cookie collector authenticates as a burner Instagram account. Session death
+          is the most common way a run fails, so test before you crawl rather than
+          discovering it twenty minutes in.
+        </p>
+      </div>
 
       {!hasActive && (
         <div className="banner warn">
@@ -44,7 +46,10 @@ export default async function SessionsPage() {
       <AddSessionForm />
 
       {all.length === 0 ? (
-        <div className="empty">No sessions configured.</div>
+        <div className="empty">
+          <b>No sessions configured.</b>
+          The Instagram collector cannot run until one is added and tested.
+        </div>
       ) : (
         <div className="table-wrap">
           <table>
@@ -54,7 +59,7 @@ export default async function SessionsPage() {
                 <th>Status</th>
                 <th>Detail</th>
                 <th>Checked</th>
-                <th />
+                <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
@@ -76,7 +81,7 @@ export default async function SessionsPage() {
                     {session.lastCheckedAt ? relativeTime(session.lastCheckedAt) : "never"}
                   </td>
                   <td>
-                    <div className="row" style={{ gap: 6 }}>
+                    <div className="actions">
                       <form action={testSession}>
                         <input type="hidden" name="id" value={session.id} />
                         <SubmitButton pendingLabel="Testing…">Test</SubmitButton>

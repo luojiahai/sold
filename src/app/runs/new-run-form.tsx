@@ -109,10 +109,10 @@ export function NewRunForm({
           <p className="small muted" style={{ margin: "6px 0 0" }}>
             {collector.description}
           </p>
-          <div className="row" style={{ gap: 6, marginTop: 8 }}>
-            <span className="tag">cost: {collector.costTier}</span>
+          <div className="row" style={{ gap: 4, marginTop: 8 }}>
+            <span className="tag">cost {collector.costTier}</span>
             <span className={`tag ${collector.supportsDateCutoff ? "ok" : "warn"}`}>
-              {collector.supportsDateCutoff ? "date cutoff supported" : "no date cutoff"}
+              {collector.supportsDateCutoff ? "date cutoff" : "no date cutoff"}
             </span>
           </div>
         </div>
@@ -135,9 +135,9 @@ export function NewRunForm({
           <p className="small muted" style={{ margin: "6px 0 0" }}>
             {detector.description}
           </p>
-          <div className="row" style={{ gap: 6, marginTop: 8 }}>
-            <span className="tag">cost: {detector.costTier}</span>
-            <span className="tag">batch of {detector.batchSize}</span>
+          <div className="row" style={{ gap: 4, marginTop: 8 }}>
+            <span className="tag">cost {detector.costTier}</span>
+            <span className="tag">batch {detector.batchSize}</span>
           </div>
         </div>
       </div>
@@ -145,25 +145,13 @@ export function NewRunForm({
       <h2 style={{ marginTop: 22 }}>Strategies</h2>
       <div className="grid" style={{ gap: 8 }}>
         {collector.strategies.map((id) => (
-          <label
-            key={id}
-            style={{
-              display: "flex",
-              gap: 9,
-              alignItems: "flex-start",
-              fontWeight: 400,
-              color: "var(--text)",
-              textTransform: "none",
-              fontSize: 13.5,
-            }}
-          >
+          <label key={id} className="plain">
             <input
               type="checkbox"
               name="strategies"
               value={id}
               checked={strategies.includes(id)}
               onChange={() => toggleStrategy(id)}
-              style={{ width: "auto", marginTop: 3 }}
             />
             <span>
               <b>{STRATEGY_LABELS[id] ?? id}</b>
@@ -183,25 +171,13 @@ export function NewRunForm({
           { value: "seed", label: `Seed list (${enabledHashtags} hashtags, ${enabledKeywords} keywords)` },
           { value: "custom", label: "Custom terms for this run" },
         ].map((option) => (
-          <label
-            key={option.value}
-            style={{
-              display: "flex",
-              gap: 7,
-              fontWeight: 400,
-              color: "var(--text)",
-              textTransform: "none",
-              fontSize: 13.5,
-              marginBottom: 0,
-            }}
-          >
+          <label key={option.value} className="plain">
             <input
               type="radio"
               name="termSource"
               value={option.value}
               checked={termSource === option.value}
               onChange={() => setTermSource(option.value)}
-              style={{ width: "auto" }}
             />
             {option.label}
           </label>
@@ -259,18 +235,8 @@ export function NewRunForm({
         </div>
       </div>
 
-      <label
-        style={{
-          display: "flex",
-          gap: 7,
-          marginTop: 14,
-          fontWeight: 400,
-          color: "var(--text)",
-          textTransform: "none",
-          fontSize: 13.5,
-        }}
-      >
-        <input type="checkbox" name="detectBacklog" style={{ width: "auto" }} />
+      <label className="plain" style={{ marginTop: 14 }}>
+        <input type="checkbox" name="detectBacklog" />
         Also detect the existing undetected backlog, not just this run&apos;s finds
       </label>
 
@@ -278,7 +244,7 @@ export function NewRunForm({
         <div style={{ marginTop: 16 }}>
           {Object.entries(checks).map(([key, result]) => (
             <div key={key} className={`banner ${result.ok ? "ok" : "bad"}`} style={{ marginBottom: 8 }}>
-              <b>{key}:</b> {result.detail}
+              <b>{key}</b> — {result.detail}
             </div>
           ))}
         </div>

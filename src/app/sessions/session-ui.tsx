@@ -36,17 +36,14 @@ export function AddSessionForm() {
   const [state, formAction] = useActionState(addSession, INITIAL);
 
   return (
-    <form action={formAction} className="card" style={{ marginBottom: 24 }}>
+    <form action={formAction} className="card" style={{ marginBottom: 16 }}>
       <div className="grid" style={{ gap: 12 }}>
-        <div style={{ maxWidth: 280 }}>
+        <div style={{ maxWidth: 260 }}>
           <label htmlFor="label">Label</label>
           <input id="label" type="text" name="label" placeholder="burner-01" />
         </div>
         <div>
-          <label htmlFor="cookies">
-            Cookies — paste a raw <code>Cookie:</code> header, a cookies.txt export, or
-            just the <code>sessionid</code> value
-          </label>
+          <label htmlFor="cookies">Cookies</label>
           <textarea
             id="cookies"
             name="cookies"
@@ -54,8 +51,9 @@ export function AddSessionForm() {
             placeholder="sessionid=…; csrftoken=…; ds_user_id=…; mid=…; ig_did=…"
           />
           <p className="small muted" style={{ margin: "6px 0 0" }}>
-            In a logged-in Instagram tab: DevTools → Application → Cookies →
-            instagram.com. Pasting the whole Cookie header is better than{" "}
+            Paste a raw <code>Cookie:</code> header, a cookies.txt export, or just the{" "}
+            <code>sessionid</code> value. In a logged-in Instagram tab: DevTools →
+            Application → Cookies → instagram.com. The whole header beats{" "}
             <code>sessionid</code> alone — the extra cookies make the session look more
             like a real browser.
           </p>
