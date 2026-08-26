@@ -14,10 +14,13 @@ export const dynamic = "force-dynamic";
 const STATUS_TONE: Record<string, string> = {
   completed: "ok",
   failed: "bad",
-  collecting: "accent",
-  detecting: "accent",
+  cancelled: "",
+  collecting: "accent live",
+  detecting: "accent live",
   pending: "",
 };
+
+const LIVE = ["pending", "collecting", "detecting"];
 
 export default async function RunsPage() {
   const history = db.select().from(runs).orderBy(desc(runs.startedAt)).limit(30).all();
@@ -44,13 +47,17 @@ export default async function RunsPage() {
 
   return (
     <>
-      <h1>Harvest runs</h1>
-      <p className="lede">
-        A run collects posts for a date range, then classifies everything that
-        doesn&apos;t already have a verdict. Collector and detector are both
-        interchangeable — that&apos;s the architecture the prototype exists to
-        demonstrate.
-      </p>
+      <div className="page-head">
+        <div>
+          <h1>Harvest runs</h1>
+          <p className="lede">
+            A run collects posts for a date range, then classifies everything that
+            doesn&apos;t already have a verdict. Collector and detector are both
+            interchangeable — that&apos;s the architecture the prototype exists to
+            demonstrate.
+          </p>
+        </div>
+      </div>
 
       <NewRunForm
         collectors={collectors}
@@ -61,7 +68,12 @@ export default async function RunsPage() {
 
       <h2>History</h2>
       {history.length === 0 ? (
-        <div className="empty">No runs yet.</div>
+        <div className="empty">
+          <b>No runs yet.</b>
+          <p className="small" style={{ margin: 0 }}>
+            Configure a collector and detector above, then start a harvest.
+          </p>
+        </div>
       ) : (
         <div className="table-wrap">
           <table>
@@ -72,50 +84,61 @@ export default async function RunsPage() {
                 <th>Collector</th>
                 <th>Detector</th>
                 <th>Range</th>
-                <th>Seen</th>
-                <th>New</th>
-                <th>Verified</th>
-                <th>Cost</th>
+                <th className="num">Seen</th>
+                <th className="num">New</th>
+                <th className="num">Verified</th>
+                <th className="num">Cost</th>
                 <th />
               </tr>
             </thead>
             <tbody>
-              {history.map((run) => (
-                <tr key={run.id}>
-                  <td>
-                    <Link href={`/runs/${run.id}`}>{relativeTime(run.startedAt)}</Link>
-                  </td>
-                  <td>
-                    <span className={`tag ${STATUS_TONE[run.status] ?? ""}`}>
-                      {run.status}
-                    </span>
-                    {isStalled(run) && (
-                      <div style={{ marginTop: 4 }}>
-                        <span className="tag warn">stalled</span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="small">{run.collectorId}</td>
-                  <td className="small">{run.detectorId}</td>
-                  <td className="small mono">
-                    {run.sinceDate} → {run.untilDate}
-                  </td>
-                  <td>{run.postsSeen}</td>
-                  <td>{run.postsNew}</td>
-                  <td>{run.postsVerified}</td>
-                  <td className="small">{money(run.detectorCostUsd)}</td>
-                  <td>
-                    {["pending", "collecting", "detecting"].includes(run.status) && (
-                      <form action={cancelRun}>
-                        <input type="hidden" name="runId" value={run.id} />
-                        <button className="small" type="submit">
-                          Stop
-                        </button>
-                      </form>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {history.map((run) => {
+                const live = LIVE.includes(run.status);
+                return (
+                  <tr key={run.id}>
+                    <td>
+                      <Link href={`/runs/${run.id}`}>{relativeTime(run.startedAt)}</Link>
+                      <div className="small faint mono">{run.id.slice(0, 8)}</div>
+                    </td>
+                    <td>
+                      <span className={`tag ${STATUS_TONE[run.status] ?? ""}`}>
+                        {live && <span className="dot" />}
+                        {run.status}
+                      </span>
+                      {isStalled(run) && (
+                        <div style={{ marginTop: 4 }}>
+                          <span className="tag warn">stalled</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="small mono">{run.collectorId}</td>
+                    <td className="small mono">{run.detectorId}</td>
+                    <td className="small mono faint">
+                      {run.sinceDate} → {run.untilDate}
+                    </td>
+                    <td className="num">{run.postsSeen}</td>
+                    <td className="num">{run.postsNew}</td>
+                    <td className="num">
+                      {run.postsVerified > 0 ? (
+                        <b>{run.postsVerified}</b>
+                      ) : (
+                        <span className="faint">0</span>
+                      )}
+                    </td>
+                    <td className="num small">{money(run.detectorCostUsd)}</td>
+                    <td>
+                      {live && (
+                        <form action={cancelRun}>
+                          <input type="hidden" name="runId" value={run.id} />
+                          <button className="small danger" type="submit">
+                            Stop
+                          </button>
+                        </form>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

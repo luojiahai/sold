@@ -20,31 +20,43 @@ export default async function SessionsPage() {
 
   return (
     <>
-      <h1>Platform sessions</h1>
-      <p className="lede">
-        The cookie collector authenticates as a burner Instagram account. Session death
-        is the most common way a run fails, so test before you crawl rather than
-        discovering it twenty minutes in.
-      </p>
+      <div className="page-head">
+        <div>
+          <h1>Platform sessions</h1>
+          <p className="lede">
+            The cookie collector authenticates as a burner Instagram account. Session
+            death is the most common way a run fails, so test before you crawl rather than
+            discovering it twenty minutes in.
+          </p>
+        </div>
+        <span className={`tag ${hasActive ? "ok" : "warn"}`}>
+          {hasActive ? "session active" : "no active session"}
+        </span>
+      </div>
 
       {!hasActive && (
         <div className="banner warn">
-          No active session. The Instagram collector cannot run until one is added and
-          tested.
+          <b>No active session.</b> The Instagram collector cannot run until one is added
+          and tested.
         </div>
       )}
 
       <div className="banner bad">
-        <b>Terms of Use.</b> Collecting via burner-account cookies breaches Instagram&apos;s
-        Terms of Use and risks account termination. Use throwaway accounts, keep the
-        request pacing conservative, and treat the vendor-API collector as the path to
-        anything beyond prototype validation.
+        <b>Terms of Use.</b> Collecting via burner-account cookies breaches
+        Instagram&apos;s Terms of Use and risks account termination. Use throwaway
+        accounts, keep the request pacing conservative, and treat the vendor-API collector
+        as the path to anything beyond prototype validation.
       </div>
 
       <AddSessionForm />
 
       {all.length === 0 ? (
-        <div className="empty">No sessions configured.</div>
+        <div className="empty">
+          <b>No sessions configured.</b>
+          <p className="small" style={{ margin: 0 }}>
+            Paste a logged-in Instagram <code>Cookie</code> header above to add one.
+          </p>
+        </div>
       ) : (
         <div className="table-wrap">
           <table>
@@ -62,7 +74,7 @@ export default async function SessionsPage() {
                 <tr key={session.id}>
                   <td>
                     <b>{session.label}</b>
-                    <div className="small muted mono">
+                    <div className="small faint mono">
                       sessionid …{session.sessionId.slice(-6)}
                     </div>
                   </td>
@@ -72,11 +84,11 @@ export default async function SessionsPage() {
                     </span>
                   </td>
                   <td className="small muted">{session.statusDetail ?? "—"}</td>
-                  <td className="small muted">
+                  <td className="small faint">
                     {session.lastCheckedAt ? relativeTime(session.lastCheckedAt) : "never"}
                   </td>
                   <td>
-                    <div className="row" style={{ gap: 6 }}>
+                    <div className="row row-tight">
                       <form action={testSession}>
                         <input type="hidden" name="id" value={session.id} />
                         <SubmitButton pendingLabel="Testing…">Test</SubmitButton>
@@ -89,7 +101,9 @@ export default async function SessionsPage() {
                       )}
                       <form action={deleteSession}>
                         <input type="hidden" name="id" value={session.id} />
-                        <SubmitButton pendingLabel="Deleting…">Delete</SubmitButton>
+                        <SubmitButton className="small danger" pendingLabel="Deleting…">
+                          Delete
+                        </SubmitButton>
                       </form>
                     </div>
                   </td>

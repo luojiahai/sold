@@ -80,13 +80,21 @@ export function RunMonitor({
     if (node) node.scrollTop = node.scrollHeight;
   }, [events]);
 
+  const tone =
+    run.status === "failed" ? "bad" : run.status === "completed" ? "ok" : "accent live";
+
   return (
     <>
-      <div className="row" style={{ marginBottom: 16 }}>
-        <span className={`tag ${run.status === "failed" ? "bad" : run.status === "completed" ? "ok" : "accent"}`}>
+      <div className="row" style={{ marginBottom: "var(--s4)" }}>
+        <span className={`tag ${tone}`}>
+          {live && <span className="dot" />}
           {run.status}
         </span>
-        {live && <span className="small muted">updating every 2s…</span>}
+        {live && (
+          <span className="small faint" aria-live="polite">
+            updating every 2s…
+          </span>
+        )}
       </div>
 
       {run.error && (
@@ -95,39 +103,41 @@ export function RunMonitor({
         </div>
       )}
 
-      <div className="stats" style={{ marginBottom: 20 }}>
+      <div className="stats" style={{ marginBottom: "var(--s5)" }}>
         <div className="stat">
-          <b>{run.postsSeen}</b>
+          <b className="num">{run.postsSeen}</b>
           <span>Collected</span>
         </div>
         <div className="stat">
-          <b>{run.postsNew}</b>
+          <b className="num">{run.postsNew}</b>
           <span>New (deduped)</span>
         </div>
         <div className="stat">
-          <b>{run.postsDetected}</b>
+          <b className="num">{run.postsDetected}</b>
           <span>Detected</span>
         </div>
-        <div className="stat">
-          <b>{run.postsVerified}</b>
+        <div className="stat ok">
+          <b className="num">{run.postsVerified}</b>
           <span>AU listings</span>
         </div>
-        <div className="stat">
-          <b>${run.detectorCostUsd.toFixed(4)}</b>
+        <div className="stat accent">
+          <b className="num">${run.detectorCostUsd.toFixed(4)}</b>
           <span>Detector cost</span>
         </div>
       </div>
 
       <h2>Log</h2>
-      <div className="log" ref={logRef}>
+      <div className="log" ref={logRef} role="log" aria-live="polite" aria-label="Run log">
         {events.length === 0 ? (
-          <div className="muted">Waiting for the first event…</div>
+          <div className="faint">Waiting for the first event…</div>
         ) : (
           events.map((event) => (
-            <div key={event.id} className={`lvl-${event.level}`}>
-              <time>{new Date(event.createdAt).toLocaleTimeString("en-AU", { hour12: false })}</time>
-              <span className="muted">[{event.phase}]</span>
-              <span>{event.message}</span>
+            <div key={event.id} className={`log-line lvl-${event.level}`}>
+              <time>
+                {new Date(event.createdAt).toLocaleTimeString("en-AU", { hour12: false })}
+              </time>
+              <span className="phase">[{event.phase}]</span>
+              <span className="msg">{event.message}</span>
             </div>
           ))
         )}
