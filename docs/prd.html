@@ -1,0 +1,912 @@
+<title>SOLD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+  :root {
+    --paper:      #f1f4f5;
+    --surface:    #ffffff;
+    --surface-2:  #e7ecee;
+    --rule:       #d2dade;
+    --ink:        #12151a;
+    --slate:      #5a656e;
+    --sold:       #c81c3b;
+    --sold-wash:  #fbe9ec;
+    --signal:     #0d6d5f;
+    --signal-wash:#e2f0ed;
+    --warn:       #96650f;
+    --warn-wash:  #f6eddc;
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --measure: 34rem;
+    --wide: 52rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #101318;
+      --surface:    #181c22;
+      --surface-2:  #212730;
+      --rule:       #2e353f;
+      --ink:        #e7ebee;
+      --slate:      #98a3ad;
+      --sold:       #ff5a76;
+      --sold-wash:  #2b171c;
+      --signal:     #4cc4ac;
+      --signal-wash:#14261f;
+      --warn:       #e3a84c;
+      --warn-wash:  #2a2114;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #101318;
+    --surface:    #181c22;
+    --surface-2:  #212730;
+    --rule:       #2e353f;
+    --ink:        #e7ebee;
+    --slate:      #98a3ad;
+    --sold:       #ff5a76;
+    --sold-wash:  #2b171c;
+    --signal:     #4cc4ac;
+    --signal-wash:#14261f;
+    --warn:       #e3a84c;
+    --warn-wash:  #2a2114;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: var(--wide);
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+  }
+
+  .col { max-width: var(--measure); }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 4.5rem 0 2.5rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .wordmark { display: flex; align-items: baseline; gap: 0.85rem; flex-wrap: wrap; }
+
+  .wordmark h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(3.2rem, 11vw, 5.5rem);
+    letter-spacing: -0.045em;
+    line-height: 0.85;
+    margin: 0;
+  }
+
+  .sticker {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--surface);
+    background: var(--sold);
+    padding: 0.3rem 0.6rem;
+    transform: rotate(-6deg);
+    align-self: center;
+    white-space: nowrap;
+  }
+
+  .expansion {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1rem, 3vw, 1.35rem);
+    letter-spacing: -0.02em;
+    color: var(--slate);
+  }
+
+  .thesis {
+    font-size: clamp(1.15rem, 2.6vw, 1.4rem);
+    line-height: 1.45;
+    max-width: 30rem;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- sections ---------- */
+
+  section { padding-top: 3.5rem; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sold);
+    margin: 0 0 0.7rem;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 4vw, 2.1rem);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 1.1rem;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.06rem;
+    letter-spacing: -0.015em;
+    margin: 2.2rem 0 0.6rem;
+  }
+
+  p { margin: 0 0 1.1rem; }
+  .col > p:last-child { margin-bottom: 0; }
+
+  a { color: var(--sold); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--sold); outline-offset: 3px; }
+
+  strong { font-weight: 600; }
+  em.q { font-style: italic; color: var(--slate); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.83em;
+    background: var(--surface-2);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+
+  ul { margin: 0 0 1.1rem; padding-left: 1.1rem; }
+  li { margin-bottom: 0.45rem; }
+  li::marker { color: var(--sold); }
+
+  /* ---------- pull quote ---------- */
+
+  .pull {
+    border-left: 3px solid var(--sold);
+    padding: 0.1rem 0 0.1rem 1.2rem;
+    margin: 1.8rem 0;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 1.18rem;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* ---------- figures ---------- */
+
+  figure {
+    margin: 2.4rem 0;
+    max-width: var(--wide);
+  }
+
+  figure svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    color: var(--ink);
+  }
+
+  figcaption {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: var(--slate);
+    margin-top: 0.9rem;
+    max-width: 40rem;
+  }
+
+  .figure-frame {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.6rem 1.4rem;
+    overflow-x: auto;
+  }
+
+  /* ---------- tables ---------- */
+
+  .table-wrap { overflow-x: auto; margin: 1.6rem 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.79rem;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    padding: 0 0.9rem 0.55rem 0;
+    border-bottom: 1.5px solid var(--ink);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.62rem 0.9rem 0.62rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  td:last-child, th:last-child { padding-right: 0; }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .pill.live  { background: var(--signal-wash); color: var(--signal); }
+  .pill.stub  { background: var(--surface-2);  color: var(--slate); }
+  .pill.risk  { background: var(--warn-wash);  color: var(--warn); }
+  .pill.stop  { background: var(--sold-wash);  color: var(--sold); }
+
+  /* ---------- callout ---------- */
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--sold);
+    border-radius: 3px;
+    padding: 1.3rem 1.4rem;
+    margin: 1.8rem 0;
+  }
+  .callout .eyebrow { margin-bottom: 0.5rem; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ---------- question list ---------- */
+
+  .questions { list-style: none; padding: 0; margin: 1.4rem 0 0; }
+  .questions li {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr;
+    gap: 0.9rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule);
+    margin: 0;
+  }
+  .questions .n {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--sold);
+    padding-top: 0.28rem;
+  }
+  .questions .why {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--slate);
+    margin-top: 0.2rem;
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.4rem;
+    border-top: 2px solid var(--ink);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--slate);
+    text-transform: uppercase;
+  }
+
+
+  /* SVG marks take their colour from the same tokens as the page, so both
+     themes resolve as a set rather than one borrowing the other's ground. */
+  figure svg .f-sold { fill: var(--sold); }
+  figure svg .s-sold { stroke: var(--sold); }
+  figure svg .f-sig  { fill: var(--signal); }
+  figure svg .f-warn { fill: var(--warn); }
+  figure svg .band   { fill: var(--sold); opacity: 0.06; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div>
+      <div class="wordmark">
+        <h1>SOLD</h1>
+        <span class="sticker">Prototype</span>
+      </div>
+      <div class="expansion">Social-Origin Listing Discovery</div>
+    </div>
+    <p class="thesis">
+      The portals have every listing that reaches them. This finds the Australian
+      property that never does.
+    </p>
+    <div class="meta">
+      <span>Platform <b>Instagram</b></span>
+      <span>Deferred <b>X · TikTok</b></span>
+      <span>Status <b>Supply validation</b></span>
+      <span>Updated <b>26 Aug 2026</b></span>
+    </div>
+  </header>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">The problem</p>
+      <h2>The listings the portals never see</h2>
+      <p>
+        realestate.com.au and Domain have effectively complete coverage of
+        <em class="q">on-market</em> listings. Any product competing there competes on
+        presentation, not on supply.
+      </p>
+      <p>The listings they don't have are the ones that never reach them:</p>
+      <ul>
+        <li><strong>Off-market</strong> sales, where a vendor wants discretion and an agent works a private buyer list.</li>
+        <li><strong>Pre-market</strong> teasers — "coming soon", "launching next week" — posted to build interest before the portal listing goes live.</li>
+        <li><strong>Private sales</strong> and small-agency stock where the portal fee isn't justified.</li>
+        <li><strong>Auction results</strong> posted within the hour, days before they appear anywhere structured.</li>
+      </ul>
+      <p>
+        These circulate on Instagram first, because that is where agents build their
+        personal brands. A buyer's agent who sees a Bondi off-market post the morning it
+        goes up has days of advantage over one waiting for a portal listing that may
+        never come.
+      </p>
+      <p class="pull">SOLD finds those posts.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">Scope</p>
+      <h2>An instrument, not a product</h2>
+      <p>
+        The product vision serves buyer's agents and active buyers, and the value is
+        time. <strong>This prototype serves neither.</strong> It is an instrument, and
+        its user is whoever is deciding whether the product is worth building.
+      </p>
+      <p>It exists to answer five questions that cannot be reasoned out:</p>
+    </div>
+
+    <ol class="questions col">
+      <li>
+        <span class="n">01</span>
+        <span><strong>Yield.</strong> How many genuine Australian listings does a week of harvesting actually produce?
+          <span class="why">Measured as verified posts per term per run.</span></span>
+      </li>
+      <li>
+        <span class="n">02</span>
+        <span><strong>Precision.</strong> What fraction of collected posts survive detection, and what does the noise look like?
+          <span class="why">Split by failure mode: not a listing, versus not Australian.</span></span>
+      </li>
+      <li>
+        <span class="n">03</span>
+        <span><strong>Uniqueness.</strong> Are these listings absent from the portals, or a slower mirror of them?
+          <span class="why">The question the entire product claim rests on.</span></span>
+      </li>
+      <li>
+        <span class="n">04</span>
+        <span><strong>Cost.</strong> What does a post cost to collect and classify?
+          <span class="why">Recorded per run in USD, straight from the detector.</span></span>
+      </li>
+      <li>
+        <span class="n">05</span>
+        <span><strong>Durability.</strong> How long does a burner session survive, and how fast do the endpoints move?
+          <span class="why">Determines whether free collection is viable at all.</span></span>
+      </li>
+    </ol>
+
+    <div class="col">
+      <div class="callout">
+        <p class="eyebrow">Success criterion</p>
+        <p>
+          The prototype succeeds if it produces a defensible answer to
+          <em class="q">"is there enough unique listing supply on Instagram to build a
+          product on?"</em> — <strong>including a well-evidenced no.</strong>
+        </p>
+      </div>
+      <p>
+        <strong>Explicit non-goals:</strong> deduplication against portal listings,
+        address resolution and geocoding, alerting, saved searches, multi-tenancy, and
+        anything resembling production infrastructure.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">Architecture</p>
+      <h2>Two seams, chosen at run time</h2>
+      <p>
+        Three components, two of which are interfaces with multiple implementations. That
+        pluggability isn't speculative generality — it follows from a real constraint:
+        <strong>platform access is a moving target with a cost, risk and reliability
+        trade-off, and the right choice will change.</strong>
+      </p>
+    </div>
+
+    <figure>
+      <div class="figure-frame">
+        <svg viewBox="0 0 880 400" role="img" aria-label="Pipeline diagram: seed terms flow into the Collector interface, which emits normalised posts to SQLite, which the Detector interface reads to produce verdicts for the web feed. Each interface has one implemented option and two declared placeholders hanging beneath it.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+            </marker>
+            <marker id="ar-sold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" class="f-sold"/>
+            </marker>
+          </defs>
+
+          <!-- main spine -->
+          <g font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">
+
+            <!-- seed terms -->
+            <rect x="8" y="52" width="112" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="64" y="70" text-anchor="middle" font-size="11">Seed terms</text>
+            <text x="64" y="86" text-anchor="middle" font-size="10" opacity="0.6">hashtags · keywords</text>
+
+            <line x1="120" y1="75" x2="172" y2="75" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+
+            <!-- COLLECTOR interface -->
+            <rect x="176" y="44" width="150" height="62" rx="3" fill="none" class="s-sold" stroke-width="2"/>
+            <text x="251" y="68" text-anchor="middle" font-size="12" font-weight="600" class="f-sold">COLLECTOR</text>
+            <text x="251" y="86" text-anchor="middle" font-size="10" class="f-sold" opacity="0.85">interface</text>
+
+            <line x1="326" y1="75" x2="382" y2="75" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="354" y="66" text-anchor="middle" font-size="9.5" opacity="0.65">normalised</text>
+
+            <!-- store -->
+            <rect x="386" y="52" width="112" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="442" y="70" text-anchor="middle" font-size="11">posts</text>
+            <text x="442" y="86" text-anchor="middle" font-size="10" opacity="0.6">SQLite · immutable</text>
+
+            <line x1="498" y1="75" x2="554" y2="75" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="526" y="66" text-anchor="middle" font-size="9.5" opacity="0.65">undetected</text>
+
+            <!-- DETECTOR interface -->
+            <rect x="558" y="44" width="150" height="62" rx="3" fill="none" class="s-sold" stroke-width="2"/>
+            <text x="633" y="68" text-anchor="middle" font-size="12" font-weight="600" class="f-sold">DETECTOR</text>
+            <text x="633" y="86" text-anchor="middle" font-size="10" class="f-sold" opacity="0.85">interface</text>
+
+            <line x1="708" y1="75" x2="762" y2="75" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="735" y="66" text-anchor="middle" font-size="9.5" opacity="0.65">verdicts</text>
+
+            <rect x="766" y="52" width="106" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <text x="819" y="70" text-anchor="middle" font-size="11">Web feed</text>
+            <text x="819" y="86" text-anchor="middle" font-size="10" opacity="0.6">verified · rejected</text>
+
+            <!-- swap rails -->
+            <line x1="251" y1="106" x2="251" y2="150" class="s-sold" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar-sold)"/>
+            <line x1="633" y1="106" x2="633" y2="150" class="s-sold" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar-sold)"/>
+            <text x="262" y="132" font-size="9.5" class="f-sold">pick one</text>
+            <text x="644" y="132" font-size="9.5" class="f-sold">pick one</text>
+
+            <!-- collector implementations -->
+            <rect x="160" y="156" width="182" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="172" y="173" font-size="11" font-weight="600">instagram-cookie</text>
+            <text x="172" y="188" font-size="9.5" opacity="0.65">burner session · free · built</text>
+
+            <rect x="160" y="204" width="182" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"/>
+            <text x="172" y="221" font-size="11" opacity="0.6">instagram-vendor-api</text>
+            <text x="172" y="236" font-size="9.5" opacity="0.45">paid · no ToS exposure</text>
+
+            <rect x="160" y="252" width="182" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"/>
+            <text x="172" y="269" font-size="11" opacity="0.6">instagram-agentic</text>
+            <text x="172" y="284" font-size="9.5" opacity="0.45">Playwright · endpoint-proof</text>
+
+            <rect x="160" y="300" width="182" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"/>
+            <text x="172" y="317" font-size="11" opacity="0.6">x · tiktok</text>
+            <text x="172" y="332" font-size="9.5" opacity="0.45">deferred</text>
+
+            <!-- detector implementations -->
+            <rect x="542" y="156" width="182" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+            <text x="554" y="173" font-size="11" font-weight="600">claude-cli</text>
+            <text x="554" y="188" font-size="9.5" opacity="0.65">batched · text-only · built</text>
+
+            <rect x="542" y="204" width="182" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"/>
+            <text x="554" y="221" font-size="11" opacity="0.6">claude-cli-vision</text>
+            <text x="554" y="236" font-size="9.5" opacity="0.45">reads the image too</text>
+
+            <rect x="542" y="252" width="182" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"/>
+            <text x="554" y="269" font-size="11" opacity="0.6">anthropic-api</text>
+            <text x="554" y="284" font-size="9.5" opacity="0.45">metered · volume path</text>
+
+            <!-- invariant note -->
+            <line x1="342" y1="176" x2="542" y2="176" stroke="currentColor" stroke-width="1" stroke-dasharray="2 4" opacity="0.35"/>
+            <text x="442" y="171" text-anchor="middle" font-size="9.5" opacity="0.6">same CollectedPost shape either side</text>
+            <text x="442" y="190" text-anchor="middle" font-size="9.5" opacity="0.6">whichever pair you pick</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        Nothing downstream of the collector seam learns how a post was obtained, and
+        nothing downstream of the detector seam learns which model judged it. Swapping a
+        free-but-fragile burner session for a paid vendor is a dropdown, not a rewrite —
+        which is why the placeholders are declared in code and visible in the UI rather
+        than left as future work.
+      </figcaption>
+    </figure>
+
+    <div class="col">
+      <h3>Collector</h3>
+      <p>
+        Takes seed terms and a date range, returns normalised posts. Implemented as a
+        Python sidecar wrapping <code>instagrapi</code>, streaming NDJSON back to Node, so
+        posts land in the run log as they arrive rather than in one lump at the end.
+      </p>
+    </div>
+
+    <div class="table-wrap col" style="max-width: var(--wide);">
+      <table>
+        <thead>
+          <tr><th>Collector</th><th>Status</th><th>Cost</th><th>Access</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>instagram-cookie</td>
+            <td><span class="pill live">Built</span></td>
+            <td>Free</td>
+            <td>Burner session, private API</td>
+          </tr>
+          <tr>
+            <td>instagram-vendor-api</td>
+            <td><span class="pill stub">Placeholder</span></td>
+            <td>High</td>
+            <td>Vendor absorbs the risk</td>
+          </tr>
+          <tr>
+            <td>instagram-agentic</td>
+            <td><span class="pill stub">Placeholder</span></td>
+            <td>High</td>
+            <td>Browser + AI reads the page</td>
+          </tr>
+          <tr>
+            <td>x · tiktok</td>
+            <td><span class="pill stub">Deferred</span></td>
+            <td>&mdash;</td>
+            <td>Different access models</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">The operational fact that matters most</p>
+      <h2>The two strategies are not equivalent</h2>
+      <p>
+        Neither Instagram surface supports server-side date filtering, and they fail that
+        constraint in completely different ways. Treating them as interchangeable would
+        make every coverage number the system produces a fiction.
+      </p>
+    </div>
+
+    <figure>
+      <div class="figure-frame">
+        <svg viewBox="0 0 880 330" role="img" aria-label="Comparison of two collection strategies against a date window. The hashtag strategy returns posts in reverse-chronological order, so it can walk back past the start date and stop with the window covered. The keyword strategy returns algorithmically ranked posts in no time order, so no stopping point is valid and it halts on budget with unknown coverage.">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g font-family="IBM Plex Mono, monospace" fill="currentColor">
+
+            <!-- shared time axis labels -->
+            <text x="118" y="26" font-size="10" opacity="0.6">older</text>
+            <text x="790" y="26" font-size="10" opacity="0.6" text-anchor="end">newer</text>
+            <line x1="118" y1="34" x2="792" y2="34" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+
+            <!-- window band -->
+            <rect x="300" y="34" width="440" height="256" class="band"/>
+            <line x1="300" y1="34" x2="300" y2="290" class="s-sold" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <line x1="740" y1="34" x2="740" y2="290" class="s-sold" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <text x="306" y="48" font-size="10" font-weight="600" class="f-sold">since</text>
+            <text x="734" y="48" font-size="10" font-weight="600" class="f-sold" text-anchor="end">until</text>
+
+            <!-- TRACK 1 -->
+            <text x="8" y="96" font-size="11.5" font-weight="600">hashtag_recent</text>
+            <text x="8" y="112" font-size="9.5" opacity="0.6">recency surface</text>
+            <line x1="118" y1="130" x2="792" y2="130" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+            <!-- chronological dots: page order == time order -->
+            <circle cx="714" cy="130" r="6" class="f-sig"/>
+            <circle cx="668" cy="130" r="6" class="f-sig"/>
+            <circle cx="622" cy="130" r="6" class="f-sig"/>
+            <circle cx="560" cy="130" r="6" class="f-sig"/>
+            <circle cx="498" cy="130" r="6" class="f-sig"/>
+            <circle cx="436" cy="130" r="6" class="f-sig"/>
+            <circle cx="374" cy="130" r="6" class="f-sig"/>
+            <circle cx="326" cy="130" r="6" class="f-sig"/>
+            <circle cx="262" cy="130" r="6" fill="currentColor" opacity="0.28"/>
+            <circle cx="212" cy="130" r="6" fill="currentColor" opacity="0.28"/>
+            <circle cx="164" cy="130" r="6" fill="currentColor" opacity="0.28"/>
+
+            <line x1="726" y1="152" x2="270" y2="152" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+            <text x="498" y="168" font-size="10" text-anchor="middle" opacity="0.75">pages arrive newest &#8594; oldest</text>
+            <text x="256" y="152" font-size="10" text-anchor="end" font-weight="600" class="f-sig">stop</text>
+            <text x="256" y="166" font-size="9.5" text-anchor="end" class="f-sig">12 consecutive too-old</text>
+
+            <!-- TRACK 2 -->
+            <text x="8" y="222" font-size="11.5" font-weight="600">keyword_serp</text>
+            <text x="8" y="238" font-size="9.5" opacity="0.6">ranked search</text>
+            <line x1="118" y1="256" x2="792" y2="256" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+
+            <!-- ranked dots: page order unrelated to time; numbers show page order -->
+            <circle cx="690" cy="256" r="6" class="f-sig"/><text x="690" y="278" font-size="9" text-anchor="middle" opacity="0.7">p1</text>
+            <circle cx="352" cy="256" r="6" class="f-sig"/><text x="352" y="278" font-size="9" text-anchor="middle" opacity="0.7">p1</text>
+            <circle cx="186" cy="256" r="6" fill="currentColor" opacity="0.28"/><text x="186" y="278" font-size="9" text-anchor="middle" opacity="0.55">p2</text>
+            <circle cx="596" cy="256" r="6" class="f-sig"/><text x="596" y="278" font-size="9" text-anchor="middle" opacity="0.7">p2</text>
+            <circle cx="248" cy="256" r="6" fill="currentColor" opacity="0.28"/><text x="248" y="278" font-size="9" text-anchor="middle" opacity="0.55">p3</text>
+            <circle cx="758" cy="256" r="6" fill="currentColor" opacity="0.28"/><text x="758" y="278" font-size="9" text-anchor="middle" opacity="0.55">p3</text>
+            <circle cx="470" cy="256" r="6" class="f-sig"/><text x="470" y="278" font-size="9" text-anchor="middle" opacity="0.7">p4</text>
+
+            <text x="498" y="212" font-size="10" text-anchor="middle" opacity="0.75">page order carries no time information</text>
+            <text x="806" y="252" font-size="10" font-weight="600" class="f-warn">stops on</text>
+            <text x="806" y="266" font-size="10" font-weight="600" class="f-warn">budget</text>
+
+            <text x="118" y="308" font-size="9.5" opacity="0.6">● in range&nbsp;&nbsp;&nbsp;● outside window</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        Same window, same seed term, incompatible guarantees. The hashtag surface walks
+        backwards through time, so passing the start date is a valid reason to stop and
+        the window is covered. The keyword SERP is ranked by relevance — page four may be
+        older than page one — so no stopping point is ever justified, and it halts only
+        when the budget runs out.
+      </figcaption>
+    </figure>
+
+    <div class="col">
+      <p>
+        This is why <code>keyword_serp</code> reports <code>budget_exhausted</code> and
+        never <code>date_cutoff</code>, however its results happen to fall. Every term in
+        every run records why it stopped:
+      </p>
+    </div>
+
+    <div class="table-wrap" style="max-width: var(--wide);">
+      <table>
+        <thead>
+          <tr><th>Termination</th><th>Meaning</th><th>Are the numbers trustworthy?</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="pill live">date_cutoff</span></td>
+            <td>Walked back past the start date</td>
+            <td>Yes — the window is covered</td>
+          </tr>
+          <tr>
+            <td><span class="pill live">source_exhausted</span></td>
+            <td>Instagram stopped returning results</td>
+            <td>Yes — nothing left to fetch</td>
+          </tr>
+          <tr>
+            <td><span class="pill risk">budget_exhausted</span></td>
+            <td>Hit the page or post cap</td>
+            <td>No — the count is a floor, not a measurement</td>
+          </tr>
+          <tr>
+            <td><span class="pill stop">error</span></td>
+            <td>Request failed</td>
+            <td>No — partial at best</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+      <p class="pull">
+        Without a termination reason, a quiet week and a truncated crawl produce identical
+        numbers.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">Detector</p>
+      <h2>Two booleans, not one</h2>
+      <p>
+        Relevance here is a judgement call, which is why detection is AI-powered. A post
+        mentioning property is not a listing, and a listing is not necessarily Australian.
+        The detector answers those as <strong>separate</strong> questions:
+        <code>isListing</code> and <code>isAustralia</code>.
+      </p>
+      <p>
+        Collapsing them would destroy the diagnostic signal. A Portland bungalow and a
+        mortgage-broker ad both fail the filter, but for opposite reasons — one is a
+        seed-list problem, the other a prompt problem. From a live run:
+      </p>
+    </div>
+
+    <div class="table-wrap" style="max-width: var(--wide);">
+      <table>
+        <thead>
+          <tr><th>Post</th><th>Listing</th><th>AU</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>@jelliscraig_hawthorn — auction, Hawthorn VIC</td>
+            <td>yes</td><td>yes</td>
+            <td><span class="pill live">Verified</span></td>
+          </tr>
+          <tr>
+            <td>@eastside.buyersagent — off-market, Bondi Beach NSW</td>
+            <td>yes</td><td>yes</td>
+            <td><span class="pill live">Verified</span></td>
+          </tr>
+          <tr>
+            <td>@pdxhomes — bungalow, Portland Oregon</td>
+            <td>yes</td><td>no</td>
+            <td><span class="pill risk">Wrong country</span></td>
+          </tr>
+          <tr>
+            <td>@someagency — team celebration, hiring post</td>
+            <td>no</td><td>&mdash;</td>
+            <td><span class="pill stop">Not a listing</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col">
+      <p>
+        The same call extracts <code>listingType</code>, <code>suburb</code>,
+        <code>state</code>, <code>priceText</code> and <code>agency</code> — near-zero
+        marginal cost once the model has read the caption, and the difference between a
+        browsable feed and a list of links.
+      </p>
+      <p>
+        Verdicts are stored <strong>append-only</strong>, one row per post per detector per
+        run. Re-running under a different detector adds a verdict rather than replacing
+        one, which is what makes two implementations comparable head to head — the entire
+        reason detection is an interface.
+      </p>
+      <p>
+        Reliability: batches of ten, three concurrent. A batch that fails to parse retries
+        once, then falls back to per-post calls, so one malformed caption cannot poison
+        nine good ones. A model that silently drops a post fails the batch rather than
+        leaving that post permanently undetected.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">Interface</p>
+      <h2>The rejected pile is the product</h2>
+      <p>
+        The feed shows verified Australian listings by default, filterable by state,
+        listing type and free text. Rejected posts are one dropdown away, with their
+        reasons attached.
+      </p>
+      <p>
+        That is a deliberate decision, not a debug affordance. During validation, what the
+        detector throws away is the more informative half: it is how you see good posts
+        being discarded, or noise the seed list should never have dragged in. The keyword
+        page carries the same logic — per-term yield, so a term that costs requests and
+        returns nothing becomes visible and prunable.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">Risk</p>
+      <h2>What could sink this</h2>
+
+      <div class="callout">
+        <p class="eyebrow">Terms of use — the central platform risk</p>
+        <p>
+          <strong>Cookie-based collection with burner accounts breaches Instagram's Terms
+          of Use.</strong> Meta has litigated against scrapers. The exposure is real, and
+          throwaway accounts do not mitigate it — they only make it cheaper to absorb.
+        </p>
+        <p>
+          Acceptable for a local prototype deciding whether the product is worth building.
+          Not a foundation for a commercial one. If SOLD proceeds, the vendor-API collector
+          stops being a placeholder and becomes the production path — which is exactly why
+          it sits in the interface from day one.
+        </p>
+      </div>
+
+      <h3>Platform fragility</h3>
+      <p>
+        Instagram removed the chronological "Recent" hashtag tab from its UI between 2020
+        and 2023; everything is ranked now. The API parameter requesting recency still
+        exists and is what both gallery-dl and instagrapi send — but whether Instagram
+        still <em class="q">honours</em> it is unverified against a live session, and it is
+        the largest open technical question in the build. If it is ignored, the date-range
+        guarantee degrades to best-effort on both strategies.
+      </p>
+
+      <h3>Detection blind spot</h3>
+      <p>
+        A significant share of Australian agency posts put the address, price and auction
+        time <strong>in the image</strong>, with a caption of emojis and hashtags.
+        Text-only detection misses those systematically. The multimodal detector exists to
+        measure that gap: run both over the same posts and compare.
+      </p>
+
+      <h3>Session mortality</h3>
+      <p>
+        The likeliest way a run dies. Mitigated by a persisted device fingerprint,
+        conservative serial pacing with jitter, preflight before every run, and a hard
+        abort that marks the session expired on a login or challenge redirect rather than
+        limping on.
+      </p>
+
+      <h3>Prototype-grade execution</h3>
+      <p>
+        Runs execute in-process and die with the server. The run table is the mitigation —
+        an interrupted run is visibly stuck rather than silently absent. A job queue is the
+        production fix and is out of scope.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col">
+      <p class="eyebrow">Roadmap</p>
+      <h2>What happens if the answer is yes</h2>
+      <ul>
+        <li><strong>Multimodal detector</strong> — measure the caption-only recall gap.</li>
+        <li><strong>Vendor-API collector</strong> — retire the ToS and session-mortality risks.</li>
+        <li><strong>Portal cross-reference</strong> — the uniqueness question, and the actual product claim.</li>
+        <li><strong>Address resolution</strong> and geocoding.</li>
+        <li><strong>X and TikTok</strong> collectors.</li>
+        <li><strong>Alerting on saved searches</strong> — the first thing resembling a product.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    SOLD · Social-Origin Listing Discovery · Prototype product document · 26 Aug 2026
+  </footer>
+
+</div>

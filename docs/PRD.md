@@ -185,3 +185,9 @@ Runs execute in-process and die with the server. The `runs` table is the mitigat
 3. How long does a burner session survive at conservative pacing?
 4. What share of verified listings are genuinely absent from REA and Domain?
 5. Does the caption-only blind spot cost 5% of recall or 40%?
+
+---
+
+A designed, shareable version of this document is published at
+https://claude.ai/code/artifact/33cd0b99-6d14-490b-877f-aa79fc6d3e76
+(source: `docs/prd.html`).
