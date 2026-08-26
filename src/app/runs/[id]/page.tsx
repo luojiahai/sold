@@ -28,30 +28,13 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
 
   return (
     <>
-      <div className="page-head">
-        <div>
-          <p className="crumb">
-            <Link href="/runs">← All runs</Link>
-          </p>
-          <h1>
-            Run <span className="mono">{run.id.slice(0, 8)}</span>
-          </h1>
-          <p className="lede">
-            <span className="mono">{run.collectorId}</span> →{" "}
-            <span className="mono">{run.detectorId}</span> · {run.sinceDate} to{" "}
-            {run.untilDate}
-          </p>
-        </div>
-
-        {["pending", "collecting", "detecting"].includes(run.status) && (
-          <form action={cancelRun}>
-            <input type="hidden" name="runId" value={run.id} />
-            <button className="danger" type="submit">
-              Stop this run
-            </button>
-          </form>
-        )}
-      </div>
+      <p className="small muted" style={{ margin: "0 0 6px" }}>
+        <Link href="/runs">← All runs</Link>
+      </p>
+      <h1>Run {run.id.slice(0, 8)}</h1>
+      <p className="lede">
+        {run.collectorId} → {run.detectorId} · {run.sinceDate} to {run.untilDate}
+      </p>
 
       {isStalled(run) && (
         <div className="banner warn">
@@ -62,26 +45,25 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         </div>
       )}
 
+      {["pending", "collecting", "detecting"].includes(run.status) && (
+        <form action={cancelRun} style={{ marginBottom: 16 }}>
+          <input type="hidden" name="runId" value={run.id} />
+          <button type="submit">Stop this run</button>
+        </form>
+      )}
+
       <RunMonitor runId={run.id} initialRun={run} initialEvents={events} />
 
       <h2>Per-term outcome</h2>
       {terms.length === 0 ? (
-        <div className="empty">
-          <b>No terms have finished yet.</b>
-          <p className="small" style={{ margin: 0 }}>
-            Each term reports its own stopping reason as it completes.
-          </p>
-        </div>
+        <p className="small muted">No terms have finished yet.</p>
       ) : (
         <>
           {truncated > 0 && (
             <div className="banner warn">
-              <b>
-                {truncated} of {terms.length} term{terms.length === 1 ? "" : "s"} stopped on
-                the page budget
-              </b>{" "}
-              rather than reaching the date cutoff. Those counts are a floor, not a
-              measurement — raise the budget to see how much more is there.
+              {truncated} of {terms.length} term(s) stopped on their page budget rather
+              than reaching the date cutoff. Those counts are a floor, not a measurement —
+              raise the budget to see how much more is there.
             </div>
           )}
           <div className="table-wrap">
@@ -90,10 +72,10 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
                 <tr>
                   <th>Term</th>
                   <th>Strategy</th>
-                  <th className="num">Pages</th>
-                  <th className="num">Seen</th>
-                  <th className="num">In range</th>
-                  <th className="num">New</th>
+                  <th>Pages</th>
+                  <th>Seen</th>
+                  <th>In range</th>
+                  <th>New</th>
                   <th>Outcome</th>
                 </tr>
               </thead>
@@ -103,11 +85,11 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
                     <td>
                       <b>{term.kind === "hashtag" ? `#${term.term}` : term.term}</b>
                     </td>
-                    <td className="small mono faint">{term.strategy}</td>
-                    <td className="num">{term.pagesFetched}</td>
-                    <td className="num">{term.postsSeen}</td>
-                    <td className="num">{term.postsInRange}</td>
-                    <td className="num">{term.postsNew}</td>
+                    <td className="small mono">{term.strategy}</td>
+                    <td>{term.pagesFetched}</td>
+                    <td>{term.postsSeen}</td>
+                    <td>{term.postsInRange}</td>
+                    <td>{term.postsNew}</td>
                     <td>
                       <span className={`tag ${terminationTone(term.terminationReason)}`}>
                         {TERMINATION_LABELS[term.terminationReason ?? ""] ??
