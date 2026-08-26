@@ -5,6 +5,8 @@ import { keywords, runs } from "@/db/schema";
 import { COLLECTORS } from "@/collectors/registry";
 import { DETECTORS } from "@/detectors/registry";
 import { money, relativeTime } from "../format";
+import { isStalled } from "@/harvest/lifecycle";
+import { cancelRun } from "./cancel-action";
 import { NewRunForm } from "./new-run-form";
 
 export const dynamic = "force-dynamic";
@@ -74,6 +76,7 @@ export default async function RunsPage() {
                 <th>New</th>
                 <th>Verified</th>
                 <th>Cost</th>
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -86,6 +89,11 @@ export default async function RunsPage() {
                     <span className={`tag ${STATUS_TONE[run.status] ?? ""}`}>
                       {run.status}
                     </span>
+                    {isStalled(run) && (
+                      <div style={{ marginTop: 4 }}>
+                        <span className="tag warn">stalled</span>
+                      </div>
+                    )}
                   </td>
                   <td className="small">{run.collectorId}</td>
                   <td className="small">{run.detectorId}</td>
@@ -96,6 +104,16 @@ export default async function RunsPage() {
                   <td>{run.postsNew}</td>
                   <td>{run.postsVerified}</td>
                   <td className="small">{money(run.detectorCostUsd)}</td>
+                  <td>
+                    {["pending", "collecting", "detecting"].includes(run.status) && (
+                      <form action={cancelRun}>
+                        <input type="hidden" name="runId" value={run.id} />
+                        <button className="small" type="submit">
+                          Stop
+                        </button>
+                      </form>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

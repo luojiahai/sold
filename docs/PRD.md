@@ -60,6 +60,8 @@ Seed terms ──▶ COLLECTOR ──▶ normalised posts ──▶ DETECTOR ─
 
 Takes seed terms and a date range; returns normalised posts. Every implementation emits the identical `CollectedPost` shape, so nothing downstream learns how the posts were obtained.
 
+Access is against Instagram's **web** private API (`www.instagram.com/api/v1/...`) using burner-account browser cookies — the surface gallery-dl has kept working for years. An earlier attempt used instagrapi's client, which speaks to the mobile API at `i.instagram.com`; that surface rejects browser `sessionid` cookies outright, and hitting it with a fabricated device fingerprint invalidated the session it authenticated with. instagrapi remains a dependency only for `extract_media_v1`, since the media payloads share a shape.
+
 | Collector | Status | Cost | Notes |
 |---|---|---|---|
 | `instagram-cookie` | **Implemented** | Free | Burner session + instagrapi private API |
@@ -160,7 +162,9 @@ A significant share of Australian agency posts put the address, price, and aucti
 
 ### 6.4 Session mortality
 
-Session death is the most likely run failure. Mitigations: persisted device fingerprint via `dump_settings`, conservative serial pacing with 3–8s jitter, preflight before every run, and a hard abort that marks the session expired on a login or challenge redirect rather than limping on.
+Session death is the most likely run failure — the first burner session tested for this project was invalidated within minutes, by our own mobile-API attempt. Mitigations: stay entirely on the web API surface a browser session is actually entitled to, conservative serial pacing with 3–8s jitter, an auth-gated preflight before every run, and a hard abort that marks the session expired on a login or challenge redirect rather than limping on.
+
+Preflight endpoint choice is load-bearing: `users/web_profile_info/` answers 200 to an unauthenticated caller and would pass a dead session, so the check uses `accounts/edit/web_form_data/`, which redirects to login without a live session.
 
 ### 6.5 Prototype-grade execution
 
