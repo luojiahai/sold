@@ -2,7 +2,8 @@ import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { sessions } from "@/db/schema";
 import { relativeTime } from "../format";
-import { activateSession, addSession, deleteSession, testSession } from "./actions";
+import { activateSession, deleteSession, testSession } from "./actions";
+import { AddSessionForm, SubmitButton } from "./session-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -40,35 +41,7 @@ export default async function SessionsPage() {
         anything beyond prototype validation.
       </div>
 
-      <form action={addSession} className="card" style={{ marginBottom: 24 }}>
-        <div className="grid" style={{ gap: 12 }}>
-          <div style={{ maxWidth: 280 }}>
-            <label htmlFor="label">Label</label>
-            <input id="label" type="text" name="label" placeholder="burner-01" />
-          </div>
-          <div>
-            <label htmlFor="cookies">
-              Cookies — paste a raw <code>Cookie:</code> header or cookies.txt contents
-            </label>
-            <textarea
-              id="cookies"
-              name="cookies"
-              rows={5}
-              placeholder="sessionid=…; csrftoken=…; ds_user_id=…; mid=…; ig_did=…"
-            />
-            <p className="small muted" style={{ margin: "6px 0 0" }}>
-              In a logged-in Instagram tab: DevTools → Network → any request → Request
-              Headers → copy the whole <code>Cookie</code> value. Either format is parsed;
-              only <code>sessionid</code> is strictly required.
-            </p>
-          </div>
-          <div>
-            <button className="primary" type="submit">
-              Add session
-            </button>
-          </div>
-        </div>
-      </form>
+      <AddSessionForm />
 
       {all.length === 0 ? (
         <div className="empty">No sessions configured.</div>
@@ -106,23 +79,17 @@ export default async function SessionsPage() {
                     <div className="row" style={{ gap: 6 }}>
                       <form action={testSession}>
                         <input type="hidden" name="id" value={session.id} />
-                        <button className="small" type="submit">
-                          Test
-                        </button>
+                        <SubmitButton pendingLabel="Testing…">Test</SubmitButton>
                       </form>
                       {session.status !== "active" && (
                         <form action={activateSession}>
                           <input type="hidden" name="id" value={session.id} />
-                          <button className="small" type="submit">
-                            Activate
-                          </button>
+                          <SubmitButton pendingLabel="Activating…">Activate</SubmitButton>
                         </form>
                       )}
                       <form action={deleteSession}>
                         <input type="hidden" name="id" value={session.id} />
-                        <button className="small" type="submit">
-                          Delete
-                        </button>
+                        <SubmitButton pendingLabel="Deleting…">Delete</SubmitButton>
                       </form>
                     </div>
                   </td>

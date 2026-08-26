@@ -6,6 +6,7 @@ import type { CollectorTerm, TermKind, TerminationReason } from "@/collectors/ty
 import type { DetectorInput } from "@/detectors/types";
 import { cacheThumbnail } from "@/media/cache";
 import { newId, nowIso } from "@/lib/id";
+import { RunCancelled, isCancelled, touchHeartbeat } from "./lifecycle";
 import {
   bumpRunCounters,
   linkRunPost,
@@ -37,6 +38,7 @@ export function createRun(config: HarvestConfig): string {
     .values({
       id,
       status: "pending",
+      heartbeatAt: nowIso(),
       collectorId: config.collectorId,
       detectorId: config.detectorId,
       config,
@@ -74,7 +76,7 @@ export async function executeRun(runId: string, config: HarvestConfig): Promise<
 
     /* ---------------------------- collect ---------------------------- */
 
-    updateRun(runId, { status: "collecting" });
+    updateRun(runId, { status: "collecting", heartbeatAt: nowIso() });
     logEvent(runId, "collect", `Starting ${collector.name} over ${config.terms.length} term(s).`);
 
     const tallies = new Map<string, TermTally>();
@@ -101,6 +103,10 @@ export async function executeRun(runId: string, config: HarvestConfig): Promise<
         logEvent(runId, "collect", `Session expired: ${event.message}`, "error");
         throw new Error(`Instagram session expired: ${event.message}`);
       }
+
+      // Checked per post rather than per term: a cancelled run should stop
+      // within seconds, not after the current hashtag finishes paginating.
+      if (isCancelled(runId)) throw new RunCancelled();
 
       if (event.type === "post") {
         const { post } = event;
@@ -170,6 +176,7 @@ export async function executeRun(runId: string, config: HarvestConfig): Promise<
       }));
 
       for await (const event of detector.detect(inputs)) {
+        if (isCancelled(runId)) throw new RunCancelled();
         if (event.type === "log") {
           logEvent(runId, "detect", event.message, event.level);
           continue;
@@ -204,6 +211,12 @@ export async function executeRun(runId: string, config: HarvestConfig): Promise<
     updateRun(runId, { status: "completed", finishedAt: nowIso() });
     logEvent(runId, "done", "Run complete.");
   } catch (err) {
+    if (err instanceof RunCancelled) {
+      // Already marked cancelled by whoever asked; just record where it stopped.
+      logEvent(runId, "cancelled", "Run stopped at the next checkpoint.", "warn");
+      updateRun(runId, { finishedAt: nowIso() });
+      return;
+    }
     const message = (err as Error).message;
     updateRun(runId, { status: "failed", error: message, finishedAt: nowIso() });
     logEvent(runId, "error", message, "error");

@@ -9,15 +9,39 @@ import { getCollector } from "@/collectors/registry";
 import { newId, nowIso } from "@/lib/id";
 import { parseCookies } from "./cookies";
 
-export async function addSession(formData: FormData) {
+export interface AddSessionState {
+  ok: boolean | null;
+  message: string;
+}
+
+/**
+ * Returns a result rather than throwing.
+ *
+ * A bad paste is the most likely outcome of the fiddliest step in the system,
+ * and it deserves an inline message telling you what was missing — not an
+ * uncaught 500 in the browser console.
+ */
+export async function addSession(
+  _previous: AddSessionState,
+  formData: FormData,
+): Promise<AddSessionState> {
   const label = String(formData.get("label") ?? "").trim() || "burner";
-  const cookies = parseCookies(String(formData.get("cookies") ?? ""));
-  const sessionId = cookies.sessionid ?? String(formData.get("sessionId") ?? "").trim();
+  const raw = String(formData.get("cookies") ?? "").trim();
+  const cookies = parseCookies(raw);
+
+  // A bare sessionid value pasted on its own is a legitimate input.
+  const bare = raw && !raw.includes("=") && !/\s/.test(raw) ? raw : "";
+  const sessionId = cookies.sessionid ?? bare;
 
   if (!sessionId) {
-    throw new Error(
-      "No `sessionid` found. Paste the full Cookie header or cookies.txt, or set the sessionid field.",
-    );
+    return {
+      ok: false,
+      message: raw
+        ? `No \`sessionid\` found in that paste. Found: ${
+            Object.keys(cookies).join(", ") || "nothing recognisable"
+          }. Copy the whole Cookie header, or just the sessionid value on its own.`
+        : "Paste your burner account's cookies first.",
+    };
   }
 
   const id = newId();
@@ -38,6 +62,10 @@ export async function addSession(formData: FormData) {
     .run();
 
   revalidatePath("/sessions");
+  return {
+    ok: true,
+    message: `Added “${label}”. Hit Test to check it against Instagram — that takes 10-20 seconds.`,
+  };
 }
 
 /** Marking one active deactivates the others: the collector uses a single session. */

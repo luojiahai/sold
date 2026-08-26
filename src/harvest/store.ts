@@ -13,6 +13,7 @@ export function logEvent(
   level: "debug" | "info" | "warn" | "error" = "info",
 ): void {
   db.insert(runEvents).values({ runId, phase, message, level }).run();
+  db.update(runs).set({ heartbeatAt: nowIso() }).where(eq(runs.id, runId)).run();
 }
 
 /**
@@ -200,6 +201,7 @@ export function bumpRunCounters(
         ? { postsVerified: sql`${runs.postsVerified} + ${delta.postsVerified}` }
         : {}),
       ...(costDelta ? { detectorCostUsd: sql`${runs.detectorCostUsd} + ${costDelta}` } : {}),
+      heartbeatAt: nowIso(),
     })
     .where(eq(runs.id, runId))
     .run();

@@ -4,6 +4,8 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { runEvents, runTerms, runs } from "@/db/schema";
 import { TERMINATION_LABELS, terminationTone } from "../../format";
+import { isStalled } from "@/harvest/lifecycle";
+import { cancelRun } from "../cancel-action";
 import { RunMonitor } from "./run-monitor";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +35,22 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       <p className="lede">
         {run.collectorId} → {run.detectorId} · {run.sinceDate} to {run.untilDate}
       </p>
+
+      {isStalled(run) && (
+        <div className="banner warn">
+          <b>This run has stalled.</b> It is still marked <code>{run.status}</code>, but it
+          has not written progress in over two minutes — runs execute in-process, so the
+          process running it has almost certainly exited. Stopping it just brings the
+          record in line with reality; no work is lost.
+        </div>
+      )}
+
+      {["pending", "collecting", "detecting"].includes(run.status) && (
+        <form action={cancelRun} style={{ marginBottom: 16 }}>
+          <input type="hidden" name="runId" value={run.id} />
+          <button type="submit">Stop this run</button>
+        </form>
+      )}
 
       <RunMonitor runId={run.id} initialRun={run} initialEvents={events} />
 

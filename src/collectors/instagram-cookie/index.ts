@@ -125,7 +125,7 @@ export const instagramCookieCollector: Collector = {
   id: "instagram-cookie",
   name: "Instagram (cookie session)",
   description:
-    "Authenticated collection via a burner account session, using instagrapi's private-API client. Hashtag strategy walks the recency surface and can honour a date cutoff; keyword strategy uses the ranked search SERP and is best-effort only.",
+    "Authenticated collection against Instagram's web API using burner-account browser cookies. Hashtag strategy walks the recency surface and can honour a date cutoff; keyword strategy uses the ranked search SERP and is best-effort only.",
   implemented: true,
   capabilities: {
     platform: "instagram",

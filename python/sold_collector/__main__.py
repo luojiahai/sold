@@ -58,12 +58,13 @@ def main() -> int:
         fatal(str(exc), kind="session_expired")
         return 3
     except RateLimited as exc:
-        fatal(f"rate limited during login: {exc}")
+        fatal(f"rate limited while authenticating: {exc}")
         return 4
 
     if mode == "preflight":
         try:
-            emit({"type": "preflight", "ok": True, **preflight(client)})
+            info = preflight(client)
+            emit({"type": "preflight", "ok": True, **info})
         except SessionExpired as exc:
             fatal(str(exc), kind="session_expired")
             return 3

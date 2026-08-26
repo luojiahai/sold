@@ -40,9 +40,9 @@ export const sessions = sqliteTable(
       .notNull()
       .default(sql`'{}'`),
     /**
-     * Path to the instagrapi settings dump for this account. Persisting it
-     * keeps the emulated device fingerprint stable across runs, which matters
-     * more for ban-avoidance than request pacing does.
+     * Reserved for collector-specific persisted state. Unused by the web-API
+     * collector, which needs no device identity — the browser cookies are the
+     * whole credential.
      */
     settingsPath: text("settings_path"),
     /** active | expired | challenged | untested */
@@ -100,6 +100,12 @@ export const runs = sqliteTable(
 
     error: text("error"),
     startedAt: text("started_at").notNull().default(now),
+    /**
+     * Touched on every progress write. Runs execute in-process, so a run whose
+     * heartbeat has gone quiet is dead rather than slow — that distinction is
+     * the only way to tell a stalled run from a working one.
+     */
+    heartbeatAt: text("heartbeat_at"),
     finishedAt: text("finished_at"),
   },
   (t) => [index("runs_status_started_idx").on(t.status, t.startedAt)],

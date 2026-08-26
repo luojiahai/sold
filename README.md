@@ -34,7 +34,9 @@ Seed terms ──▶ COLLECTOR ──▶ normalised posts ──▶ DETECTOR ─
              (interface)         (SQLite)         (interface)
 ```
 
-- **Collector** — `src/collectors/`. `instagram-cookie` drives a Python sidecar (`python/sold_collector/`) wrapping instagrapi, streaming NDJSON back to Node. Vendor-API and agentic collectors are declared placeholders.
+- **Collector** — `src/collectors/`. `instagram-cookie` drives a Python sidecar (`python/sold_collector/`) that calls Instagram's web API with burner cookies and streams NDJSON back to Node. Vendor-API and agentic collectors are declared placeholders.
+
+  > Don't route this through instagrapi's client: it targets the mobile API at `i.instagram.com`, which rejects browser `sessionid` cookies and invalidates the session when you try. instagrapi is used only for `extract_media_v1`.
 - **Detector** — `src/detectors/`. `claude-cli` batches posts through `claude -p --output-format json`. Multimodal and API detectors are declared placeholders.
 - **Web** — `src/app/`. Feed, Runs, Keywords, Sessions.
 
