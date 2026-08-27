@@ -61,13 +61,16 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         <Link href="/">← Feed</Link>
       </p>
       <div className="page-head">
-        <h1>@{post.authorHandle ?? "unknown"}</h1>
-        <p className="lede">
-          {relativeTime(post.postedAt)} ·{" "}
-          <a href={post.url} target="_blank" rel="noopener noreferrer">
-            View on Instagram ↗
-          </a>
-        </p>
+        <div>
+          <h1>@{post.authorHandle ?? "unknown"}</h1>
+          <p className="lede">
+            {relativeTime(post.postedAt)}
+            {post.locationName && <> · tagged {post.locationName}</>}
+          </p>
+        </div>
+        <a href={post.url} target="_blank" rel="noopener noreferrer" className="btn">
+          View on Instagram ↗
+        </a>
       </div>
 
       <div className="detail">
@@ -85,14 +88,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             <div>
               {post.likeCount ?? "—"} likes · {post.commentCount ?? "—"} comments
             </div>
-            {post.locationName && <div>Tagged {post.locationName}</div>}
           </div>
         </div>
 
         <div>
           {latest && (
             <div className={`verdict ${verified ? "k-ok" : "k-bad"}`}>
-              <div className="row" style={{ gap: 4 }}>
+              <div className="chips">
                 <span className={`tag ${latest.isListing ? "ok" : "bad"}`}>
                   {latest.isListing ? "Is a listing" : "Not a listing"}
                 </span>
@@ -148,7 +150,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           )}
 
           {post.hashtags.length > 0 && (
-            <div className="row" style={{ gap: 4, marginTop: 12 }}>
+            <div className="chips" style={{ marginTop: 12 }}>
               {post.hashtags.map((tag) => (
                 <span key={tag} className="tag mono">
                   #{tag}

@@ -40,7 +40,7 @@ Seed terms ──▶ COLLECTOR ──▶ normalised posts ──▶ DETECTOR ─
 - **Detector** — `src/detectors/`. `claude-cli` batches posts through `claude -p --output-format json`. It classifies (`isListing`, `isAustralia`) and extracts the listing's address, price, type and agency in the same call. Multimodal and API detectors are declared placeholders.
 
   > Extraction is **strictly verbatim**: a field the post didn't write is null. `addressText` holds the address exactly as written and is what you audit a verdict against; the model is told not to complete a postcode it happens to know, because one invented field makes every other field unfalsifiable. Price numerics and state abbreviations are derived in code (`src/lib/property.ts`), not asked of the model.
-- **Web** — `src/app/`. Feed, Runs, Keywords, Sessions. The Runs page also offers **re-detection**: replaying already-collected posts through the current prompt, behind a two-step confirm showing the post count and an estimated cost. Dark-first; the theme switch at the bottom of the sidebar offers system / light / dark and stores the choice in a cookie, so the server renders the right theme on first paint. A live run — harvest or re-detection — pins a status strip above every page.
+- **Web** — `src/app/`. Feed, Runs, Keywords, Sessions. The Runs page also offers **re-detection**: replaying already-collected posts through the current prompt, behind a two-step confirm showing the post count and an estimated cost. Light-first; the theme switch at the bottom of the sidebar offers auto / light / dark and stores the choice in a cookie, so the server renders the right theme on first paint. A live run — harvest or re-detection — pins a status strip above every page.
 
 ## Two things worth knowing
 

@@ -14,30 +14,34 @@ export default async function KeywordsPage() {
   return (
     <>
       <div className="page-head">
-        <h1>Seed terms</h1>
-        <p className="lede">
-          Recall lives and dies by this list. Hashtags go through the recency surface and
-          can honour a date cutoff; keywords go through ranked search and are best-effort.
-          Yield columns fill in as runs complete, so terms that cost requests without
-          returning listings become visible and prunable.
-        </p>
+        <div>
+          <h1>Seed terms</h1>
+          <p className="lede">
+            Recall lives and dies by this list. Hashtags go through the recency surface and
+            can honour a date cutoff; keywords go through ranked search and are best-effort.
+            Yield columns fill in as runs complete, so terms that cost requests without
+            returning listings become visible and prunable.
+          </p>
+        </div>
       </div>
 
-      <form action={addKeywords} className="filters">
-        <div className="field grow">
-          <label htmlFor="terms">Add terms — one per line or comma-separated</label>
-          <textarea id="terms" name="terms" rows={2} placeholder="offmarket, presale, comingsoon" />
+      <form action={addKeywords} className="card" style={{ marginBottom: 16 }}>
+        <div className="row" style={{ alignItems: "flex-end", gap: 12 }}>
+          <div style={{ flex: "1 1 280px", minWidth: 0 }}>
+            <label htmlFor="terms">Add terms — one per line or comma-separated</label>
+            <textarea id="terms" name="terms" rows={2} placeholder="offmarket, presale, comingsoon" />
+          </div>
+          <div style={{ flex: "0 1 160px" }}>
+            <label htmlFor="kind">Kind</label>
+            <select id="kind" name="kind" defaultValue="hashtag">
+              <option value="hashtag">Hashtag</option>
+              <option value="keyword">Keyword</option>
+            </select>
+          </div>
+          <button className="primary" type="submit">
+            Add terms
+          </button>
         </div>
-        <div className="field fixed">
-          <label htmlFor="kind">Kind</label>
-          <select id="kind" name="kind" defaultValue="hashtag">
-            <option value="hashtag">Hashtag</option>
-            <option value="keyword">Keyword</option>
-          </select>
-        </div>
-        <button className="primary" type="submit">
-          Add
-        </button>
       </form>
 
       {all.length === 0 ? (
@@ -75,8 +79,13 @@ export default async function KeywordsPage() {
                     <td>
                       <form action={toggleKeyword}>
                         <input type="hidden" name="id" value={keyword.id} />
-                        <button className="small" type="submit">
-                          {keyword.enabled ? "on" : "off"}
+                        <button
+                          className="small"
+                          type="submit"
+                          data-on={keyword.enabled}
+                          aria-label={`${keyword.enabled ? "Disable" : "Enable"} ${keyword.term}`}
+                        >
+                          {keyword.enabled ? "On" : "Off"}
                         </button>
                       </form>
                     </td>

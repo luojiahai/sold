@@ -90,7 +90,7 @@ export function NewRunForm({
 
   return (
     <form action={startHarvest} className="card">
-      <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="grid two" style={{ gap: 20 }}>
         <div>
           <label htmlFor="collectorId">Collector</label>
           <select
@@ -106,11 +106,9 @@ export function NewRunForm({
               </option>
             ))}
           </select>
-          <p className="small muted" style={{ margin: "6px 0 0" }}>
-            {collector.description}
-          </p>
-          <div className="row" style={{ gap: 4, marginTop: 8 }}>
-            <span className="tag">cost {collector.costTier}</span>
+          <p className="help">{collector.description}</p>
+          <div className="chips" style={{ marginTop: 8 }}>
+            <span className="tag">cost · {collector.costTier}</span>
             <span className={`tag ${collector.supportsDateCutoff ? "ok" : "warn"}`}>
               {collector.supportsDateCutoff ? "date cutoff" : "no date cutoff"}
             </span>
@@ -132,20 +130,18 @@ export function NewRunForm({
               </option>
             ))}
           </select>
-          <p className="small muted" style={{ margin: "6px 0 0" }}>
-            {detector.description}
-          </p>
-          <div className="row" style={{ gap: 4, marginTop: 8 }}>
-            <span className="tag">cost {detector.costTier}</span>
+          <p className="help">{detector.description}</p>
+          <div className="chips" style={{ marginTop: 8 }}>
+            <span className="tag">cost · {detector.costTier}</span>
             <span className="tag">batch {detector.batchSize}</span>
           </div>
         </div>
       </div>
 
-      <h2 style={{ marginTop: 22 }}>Strategies</h2>
-      <div className="grid" style={{ gap: 8 }}>
+      <h2>Strategies</h2>
+      <div className="options">
         {collector.strategies.map((id) => (
-          <label key={id} className="plain">
+          <label key={id} className="option">
             <input
               type="checkbox"
               name="strategies"
@@ -153,25 +149,30 @@ export function NewRunForm({
               checked={strategies.includes(id)}
               onChange={() => toggleStrategy(id)}
             />
+            <i className="box" aria-hidden="true" />
             <span>
               <b>{STRATEGY_LABELS[id] ?? id}</b>
-              {STRATEGY_NOTES[id] && (
-                <span className="small muted" style={{ display: "block" }}>
-                  {STRATEGY_NOTES[id]}
-                </span>
-              )}
+              {STRATEGY_NOTES[id] && <small>{STRATEGY_NOTES[id]}</small>}
             </span>
           </label>
         ))}
       </div>
 
       <h2>Terms</h2>
-      <div className="row" style={{ gap: 16, marginBottom: 10 }}>
+      <div className="options">
         {[
-          { value: "seed", label: `Seed list (${enabledHashtags} hashtags, ${enabledKeywords} keywords)` },
-          { value: "custom", label: "Custom terms for this run" },
+          {
+            value: "seed",
+            label: "Seed list",
+            note: `${enabledHashtags} hashtags and ${enabledKeywords} keywords currently enabled.`,
+          },
+          {
+            value: "custom",
+            label: "Custom terms for this run",
+            note: "Typed below; the seed list is left alone.",
+          },
         ].map((option) => (
-          <label key={option.value} className="plain">
+          <label key={option.value} className="option">
             <input
               type="radio"
               name="termSource"
@@ -179,13 +180,17 @@ export function NewRunForm({
               checked={termSource === option.value}
               onChange={() => setTermSource(option.value)}
             />
-            {option.label}
+            <i className="box" aria-hidden="true" />
+            <span>
+              <b>{option.label}</b>
+              <small>{option.note}</small>
+            </span>
           </label>
         ))}
       </div>
 
       {termSource === "custom" && (
-        <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div className="grid two" style={{ gap: 14, marginTop: 12 }}>
           <div>
             <label htmlFor="customHashtags">Hashtags (one per line, no #)</label>
             <textarea
@@ -235,13 +240,14 @@ export function NewRunForm({
         </div>
       </div>
 
-      <label className="plain" style={{ marginTop: 14 }}>
+      <label className="switch" style={{ marginTop: 18 }}>
         <input type="checkbox" name="detectBacklog" />
+        <i aria-hidden="true" />
         Also detect the existing undetected backlog, not just this run&apos;s finds
       </label>
 
       {checks && (
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 18 }}>
           {Object.entries(checks).map(([key, result]) => (
             <div key={key} className={`banner ${result.ok ? "ok" : "bad"}`} style={{ marginBottom: 8 }}>
               <b>{key}</b> — {result.detail}
@@ -251,14 +257,14 @@ export function NewRunForm({
       )}
 
       {blocked && (
-        <div className="banner warn" style={{ marginTop: 16 }}>
+        <div className="banner warn" style={{ marginTop: 18 }}>
           {!collector.implemented && `${collector.name} is a declared placeholder. `}
           {!detector.implemented && `${detector.name} is a declared placeholder. `}
           Pick an implemented option to start a run.
         </div>
       )}
 
-      <div className="row" style={{ marginTop: 18 }}>
+      <div className="row" style={{ marginTop: 22 }}>
         <button className="primary" type="submit" disabled={blocked || strategies.length === 0}>
           Start harvest
         </button>
