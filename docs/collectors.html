@@ -280,17 +280,17 @@
   <section>
     <div class="col">
       <p class="eyebrow">The pipeline</p>
-      <h2>Five steps, one that talks to Instagram</h2>
+      <h2>Four steps, one that talks to Instagram</h2>
       <p>
         SOLD turns a list of search terms into a feed of verified Australian property
         listings. The <strong>collector</strong> is the only step that has to get past
-        Instagram; the other four run on our own machines.
+        Instagram; the other three run on our own machines.
       </p>
     </div>
 
     <figure>
       <div class="figure-frame">
-        <svg viewBox="0 0 880 250" role="img" aria-label="Pipeline diagram: seed terms flow into the collector, which emits posts, which the detector turns into verified listings. The collector box is highlighted, with three interchangeable options listed beneath it.">
+        <svg viewBox="0 0 880 250" role="img" aria-label="Pipeline diagram: seed terms flow into the collector, then the detector, which produces verified listings. The collector box is highlighted, with three interchangeable options listed beneath it.">
           <defs>
             <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
@@ -301,41 +301,36 @@
           </defs>
 
           <!-- Instagram band -->
-          <rect x="176" y="12" width="176" height="76" rx="4" class="wash"/>
-          <text x="264" y="26" text-anchor="middle" font-size="9" letter-spacing="1.5" class="f-sold" font-weight="600">TOUCHES INSTAGRAM</text>
+          <rect x="224" y="12" width="204" height="76" rx="4" class="wash"/>
+          <text x="326" y="26" text-anchor="middle" font-size="9" letter-spacing="1.5" class="f-sold" font-weight="600">TOUCHES INSTAGRAM</text>
 
           <!-- boxes -->
-          <rect x="20"  y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          <text x="85"  y="64" text-anchor="middle" font-size="12" font-weight="600">Seed terms</text>
+          <rect x="20"  y="40" width="160" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="100" y="64" text-anchor="middle" font-size="12" font-weight="600">Seed terms</text>
 
-          <rect x="198" y="40" width="132" height="40" rx="3" fill="none" class="s-sold" stroke-width="2.5"/>
-          <text x="264" y="64" text-anchor="middle" font-size="12" font-weight="700" class="f-sold">Collector</text>
+          <rect x="246" y="40" width="160" height="40" rx="3" fill="none" class="s-sold" stroke-width="2.5"/>
+          <text x="326" y="64" text-anchor="middle" font-size="12" font-weight="700" class="f-sold">Collector</text>
 
-          <rect x="378" y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          <text x="443" y="64" text-anchor="middle" font-size="12" font-weight="600">Posts</text>
+          <rect x="472" y="40" width="160" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="552" y="64" text-anchor="middle" font-size="12" font-weight="600">Detector</text>
 
-          <rect x="556" y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          <text x="621" y="64" text-anchor="middle" font-size="12" font-weight="600">Detector</text>
-
-          <rect x="734" y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          <text x="799" y="59" text-anchor="middle" font-size="12" font-weight="600">Verified</text>
-          <text x="799" y="72" text-anchor="middle" font-size="12" font-weight="600">listing</text>
+          <rect x="698" y="40" width="160" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="778" y="64" text-anchor="middle" font-size="12" font-weight="600">Verified listing</text>
 
           <!-- arrows -->
-          <line x1="150" y1="60" x2="196" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
-          <line x1="330" y1="60" x2="376" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
-          <line x1="508" y1="60" x2="554" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
-          <line x1="686" y1="60" x2="732" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="180" y1="60" x2="244" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="406" y1="60" x2="470" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="632" y1="60" x2="696" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
 
           <!-- captions under boxes -->
-          <text x="85"  y="100" text-anchor="middle" font-size="9.5" class="f-slate">29 hashtags + keywords</text>
-          <text x="443" y="100" text-anchor="middle" font-size="9.5" class="f-slate">caption, author, date, image</text>
-          <text x="621" y="100" text-anchor="middle" font-size="9.5" class="f-slate">Claude reads each post</text>
-          <text x="799" y="100" text-anchor="middle" font-size="9.5" class="f-slate">real listing, in Australia</text>
+          <text x="100" y="100" text-anchor="middle" font-size="9.5" class="f-slate">hashtags + keywords</text>
+          <text x="326" y="100" text-anchor="middle" font-size="9.5" class="f-slate">fetches posts, saves each once</text>
+          <text x="552" y="100" text-anchor="middle" font-size="9.5" class="f-slate">Claude reads each post</text>
+          <text x="778" y="100" text-anchor="middle" font-size="9.5" class="f-slate">real listing, in Australia</text>
 
           <!-- swap rail -->
-          <line x1="264" y1="88" x2="264" y2="128" class="s-sold" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar-sold)"/>
-          <text x="274" y="112" font-size="9.5" class="f-sold">pick one &mdash; swappable</text>
+          <line x1="326" y1="88" x2="326" y2="128" class="s-sold" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar-sold)"/>
+          <text x="336" y="112" font-size="9.5" class="f-sold">pick one &mdash; swappable</text>
 
           <!-- three options -->
           <rect x="60" y="134" width="240" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
