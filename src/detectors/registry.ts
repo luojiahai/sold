@@ -12,6 +12,7 @@ const anthropicApiDetector: Detector = {
   description:
     "Direct Messages API with tool-use structured output. Cheaper and faster than process-spawning at volume, and the natural home for the Batches API, but needs an API key and metered billing.",
   model: null,
+  promptVersion: 0,
   implemented: false,
   capabilities: { multimodal: false, batchSize: 50, concurrency: 8, costTier: "medium" },
   async preflight() {
@@ -29,6 +30,7 @@ const claudeVisionDetector: Detector = {
   description:
     "Reads the cached thumbnail alongside the caption. Australian agency posts routinely put the address, price and auction time in the graphic with an emoji-only caption, so caption-only detection has a systematic blind spot this would measure.",
   model: null,
+  promptVersion: 0,
   implemented: false,
   capabilities: { multimodal: true, batchSize: 5, concurrency: 2, costTier: "medium" },
   async preflight() {

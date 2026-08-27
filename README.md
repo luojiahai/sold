@@ -37,14 +37,16 @@ Seed terms ──▶ COLLECTOR ──▶ normalised posts ──▶ DETECTOR ─
 - **Collector** — `src/collectors/`. `instagram-cookie` drives a Python sidecar (`python/sold_collector/`) that calls Instagram's web API with burner cookies and streams NDJSON back to Node. Vendor-API and agentic collectors are declared placeholders.
 
   > Don't route this through instagrapi's client: it targets the mobile API at `i.instagram.com`, which rejects browser `sessionid` cookies and invalidates the session when you try. instagrapi is used only for `extract_media_v1`.
-- **Detector** — `src/detectors/`. `claude-cli` batches posts through `claude -p --output-format json`. Multimodal and API detectors are declared placeholders.
-- **Web** — `src/app/`. Feed, Runs, Keywords, Sessions. Dark-first; the theme switch at the bottom of the sidebar offers system / light / dark and stores the choice in a cookie, so the server renders the right theme on first paint. A live harvest pins a status strip above every page.
+- **Detector** — `src/detectors/`. `claude-cli` batches posts through `claude -p --output-format json`. It classifies (`isListing`, `isAustralia`) and extracts the listing's address, price, type and agency in the same call. Multimodal and API detectors are declared placeholders.
+
+  > Extraction is **strictly verbatim**: a field the post didn't write is null. `addressText` holds the address exactly as written and is what you audit a verdict against; the model is told not to complete a postcode it happens to know, because one invented field makes every other field unfalsifiable. Price numerics and state abbreviations are derived in code (`src/lib/property.ts`), not asked of the model.
+- **Web** — `src/app/`. Feed, Runs, Keywords, Sessions. The Runs page also offers **re-detection**: replaying already-collected posts through the current prompt, behind a two-step confirm showing the post count and an estimated cost. Dark-first; the theme switch at the bottom of the sidebar offers system / light / dark and stores the choice in a cookie, so the server renders the right theme on first paint. A live run — harvest or re-detection — pins a status strip above every page.
 
 ## Two things worth knowing
 
 **The strategies are not equivalent.** `hashtag_recent` is roughly chronological and can honour a date cutoff. `keyword_serp` is algorithmically ranked, so it's budgeted and best-effort — it can never claim exhaustive coverage of a date range. Every term records *why* it stopped; `budget_exhausted` means the numbers are a floor, not a measurement.
 
-**Detections are append-only.** Re-running a post through a different detector adds a verdict rather than replacing one, so implementations stay comparable. `posts.latestDetectionId` keeps the feed query a single join.
+**Detections are append-only.** Re-running a post through a different detector adds a verdict rather than replacing one, so implementations stay comparable. `posts.latestDetectionId` keeps the feed query a single join. Every verdict records `promptVersion` alongside `detectorId` and `model`, which is both provenance and the predicate re-detection selects on — bump `PROMPT_VERSION` in `src/detectors/claude-cli/prompt.ts` whenever you change the prompt, and the Runs page will offer to bring the corpus up to date.
 
 ## Configuration
 
@@ -62,6 +64,7 @@ Seed terms ──▶ COLLECTOR ──▶ normalised posts ──▶ DETECTOR ─
 | Command | Does |
 |---|---|
 | `npm run dev` | Start the app |
+| `npm test` | Run the unit tests (`node --test`, no framework) |
 | `npm run setup` | Migrate, seed, build the Python venv |
 | `npm run db:generate` | Generate migrations from the schema |
 | `npm run db:migrate` | Apply migrations |

@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { extractJsonArray, runClaude } from "@/lib/claude";
-import { buildPrompt } from "./prompt";
+import {
+  normalisePostcode,
+  normaliseState,
+  normaliseSuburb,
+  parsePrice,
+} from "@/lib/property";
+import { PROMPT_VERSION, buildPrompt } from "./prompt";
 import type {
   DetectEvent,
   DetectionVerdict,
@@ -18,6 +24,13 @@ const LISTING_TYPES = [
   "other",
 ] as const;
 
+/** An optional string field: absent, empty and whitespace all mean null. */
+const nullableText = z
+  .string()
+  .nullable()
+  .catch(null)
+  .transform((v) => v?.trim() || null);
+
 /**
  * Lenient on shape, strict on meaning: models reliably produce the right
  * fields but not always the right primitive (confidence as "85", isListing as
@@ -30,28 +43,61 @@ const verdictSchema = z.object({
   confidence: z.coerce.number().min(0).max(100).catch(0),
   reason: z.string().default(""),
   listingType: z.enum(LISTING_TYPES).nullable().catch(null),
-  suburb: z.string().nullable().catch(null),
-  state: z.string().nullable().catch(null),
-  priceText: z.string().nullable().catch(null),
-  agency: z.string().nullable().catch(null),
+  addressText: nullableText,
+  unit: nullableText,
+  streetNumber: nullableText,
+  street: nullableText,
+  suburb: nullableText,
+  state: nullableText,
+  postcode: nullableText,
+  propertyCount: z.coerce.number().int().positive().nullable().catch(null),
+  priceText: nullableText,
+  agency: nullableText,
 });
 
 const BATCH_SIZE = Number(process.env.SOLD_DETECT_BATCH_SIZE ?? 10);
 const CONCURRENCY = Number(process.env.SOLD_DETECT_CONCURRENCY ?? 3);
 const MODEL = process.env.SOLD_DETECT_MODEL ?? "claude-sonnet-5";
 
+/**
+ * Turns one model row into a verdict.
+ *
+ * Two things happen here that the prompt deliberately does not ask the model
+ * for. State, suburb and postcode are canonicalised through `lib/property`, so
+ * "Victoria" and "VIC" cannot fragment the feed's state filter into two
+ * options. And the numeric price fields are parsed from `priceText` in code
+ * rather than requested — a pure function over a short string can be tested
+ * exhaustively and cannot drift between runs.
+ */
 function toVerdict(raw: unknown, fallbackId: string): DetectionVerdict {
   const parsed = verdictSchema.parse(raw);
+  const listingType = parsed.listingType as ListingType | null;
+  const price = parsePrice(parsed.priceText, listingType);
+
   return {
     postId: parsed.id || fallbackId,
     isListing: parsed.isListing,
     isAustralia: parsed.isAustralia,
     confidence: Math.round(parsed.confidence),
     reason: parsed.reason,
-    listingType: parsed.listingType as ListingType | null,
-    suburb: parsed.suburb,
-    state: parsed.state,
+    listingType,
+
+    addressText: parsed.addressText,
+    unit: parsed.unit,
+    streetNumber: parsed.streetNumber,
+    street: parsed.street,
+    suburb: normaliseSuburb(parsed.suburb),
+    state: normaliseState(parsed.state),
+    postcode: normalisePostcode(parsed.postcode),
+    propertyCount: parsed.propertyCount,
+
     priceText: parsed.priceText,
+    priceMin: price.min,
+    priceMax: price.max,
+    pricePeriod: price.period,
+    priceCurrency: price.currency,
+    priceQualifier: price.qualifier,
+
     agency: parsed.agency,
   };
 }
@@ -64,9 +110,20 @@ function errorVerdict(postId: string, message: string): DetectionVerdict {
     confidence: 0,
     reason: `Detection failed: ${message}`,
     listingType: null,
+    addressText: null,
+    unit: null,
+    streetNumber: null,
+    street: null,
     suburb: null,
     state: null,
+    postcode: null,
+    propertyCount: null,
     priceText: null,
+    priceMin: null,
+    priceMax: null,
+    pricePeriod: null,
+    priceCurrency: null,
+    priceQualifier: null,
     agency: null,
     viaFallback: true,
     error: message,
@@ -128,6 +185,7 @@ export const claudeCliDetector: Detector = {
   description:
     "Classifies posts by shelling out to `claude -p` with a JSON-only prompt. Batches posts per call; a batch that fails to parse retries once, then falls back to per-post calls so one malformed caption cannot poison nine good ones.",
   model: MODEL,
+  promptVersion: PROMPT_VERSION,
   implemented: true,
   capabilities: {
     multimodal: false,

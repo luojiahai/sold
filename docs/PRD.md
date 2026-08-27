@@ -45,7 +45,9 @@ The prototype succeeds if it produces a defensible answer to "is there enough un
 
 ### Explicit non-goals
 
-Deduplicating against portal listings · address resolution and geocoding · alerting and saved searches · multi-tenancy · anything resembling production infrastructure.
+Deduplicating against portal listings · **resolving or geocoding** an address — turning it into coordinates, validating it against a gazetteer, or completing the parts a post left out · alerting and saved searches · multi-tenancy · anything resembling production infrastructure.
+
+Extracting an address a post *wrote* is in scope and is what the detector does. Working out an address a post *didn't* write is not.
 
 ## 4. Architecture
 
@@ -101,7 +103,13 @@ The detector answers **two separate booleans**:
 
 Collapsing these would destroy the diagnostic signal. A Portland bungalow listing and a mortgage-broker ad both fail the filter, but they fail for opposite reasons: one is a seed-list problem, the other is a prompt problem. The run stats show that split.
 
-The same call also extracts `listingType`, `suburb`, `state`, `priceText`, and `agency` — near-zero marginal cost once the model has read the caption, and the difference between a browsable feed and a list of links.
+The same call also extracts the listing's **address and price** — near-zero marginal cost once the model has read the caption, and the difference between a browsable feed and a list of links. `addressText` holds the address exactly as the post wrote it and `unit`/`streetNumber`/`street`/`suburb`/`state`/`postcode` hold it segmented; `priceText` likewise holds the price verbatim, with `priceMin`/`priceMax`/`pricePeriod`/`priceCurrency`/`priceQualifier` derived from it. `listingType`, `agency` and `propertyCount` complete the set.
+
+**Extraction is strictly verbatim: a field the post did not write is null.** The model is told this repeatedly and told not to complete a postcode it happens to know. This is the property that makes a verdict auditable — `addressText` can be diffed against the caption — and it is all-or-nothing, because one invented field makes every sibling field indistinguishable from a real one. Suburb-to-postcode is a deterministic table join and belongs in code, if it is ever wanted at all. The platform's location tag is allowed to supply `suburb` and `state` but never a street-level field: it is chosen from a gazetteer and is routinely the agency's office rather than the property.
+
+Nothing derived is asked of the model. The price numerics are parsed from `priceText` and the state is canonicalised to its abbreviation by `src/lib/property.ts` — pure functions with a test table, because a parser can be verified exhaustively and a prompt can only be hoped at. A post advertising several properties records `propertyCount` and extracts the first; partial data, flagged as partial rather than passed off as complete.
+
+Round-up posts aside, `isListing` and `isAustralia` are untouched by any of this. A listing with no street address — which is most off-market stock, deliberately — is still a listing.
 
 | Detector | Status | Notes |
 |---|---|---|
@@ -110,6 +118,8 @@ The same call also extracts `listingType`, `suburb`, `state`, `priceText`, and `
 | `anthropic-api` | Placeholder | Metered API; the volume path |
 
 Detections are stored **append-only**, one row per (post, detector, run). A re-run under a different detector adds a verdict rather than replacing one, which is what makes two detectors comparable head-to-head — the entire reason detection is an interface.
+
+Every verdict also records `promptVersion`. The prompt is at least as large a determinant of an answer as the model is, and it was previously the only input to a detection that left no trace — two verdicts months apart were indistinguishable in the table even though they had been asked different questions. It is also the predicate **re-detection** selects on: the Runs page can replay already-collected posts through the current prompt, scoped cheapest-first to stale verified listings, all stale verdicts, or every verified listing regardless of version. Selection is keyed on the version rather than on which fields are null, because nullness cannot tell "never asked" apart from "asked, and the post genuinely didn't say" — an off-market teaser with no address would otherwise be re-detected forever. A re-detection is a real `runs` row (`kind = 'redetect'`) so its spend lands in the same ledger as everything else, and it goes through the normal lifecycle, so heartbeats, cancellation and orphan reconciliation need no special case.
 
 Reliability: batches of ~10 with 3 concurrent calls; a batch that fails to parse retries once, then falls back to per-post calls, so one malformed caption cannot poison nine good ones. A model that silently drops a post from its response fails the batch rather than leaving that post permanently undetected.
 
@@ -133,7 +143,7 @@ Reliability: batches of ~10 with 3 concurrent calls; a batch that fails to parse
 |---|---|
 | `posts` | Normalised, immutable post record |
 | `detections` | Append-only verdicts, one per (post, detector, run) |
-| `runs` | Harvest execution: status, counters, detector cost in USD |
+| `runs` | Execution record — `kind` harvest or redetect: status, counters, detector cost in USD |
 | `run_terms` | Per-term outcome **including termination reason** |
 | `run_posts` | Which run saw which post via which term — survives dedup |
 | `run_events` | Append-only progress log |

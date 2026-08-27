@@ -2,11 +2,12 @@
   "name": "sold",
   "version": "0.1.0",
   "private": true,
-  "description": "SOLD — Social-Origin Listing Discovery",
+  "description": "SOLD \u2014 Social-Origin Listing Discovery",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --test --import tsx 'src/**/*.test.ts'",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",

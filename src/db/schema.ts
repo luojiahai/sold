@@ -82,6 +82,15 @@ export const runs = sqliteTable(
   "runs",
   {
     id: text("id").primaryKey(),
+    /**
+     * harvest | redetect
+     *
+     * Orthogonal to `status`: a re-detection genuinely passes through
+     * `detecting`, `completed`, and `cancelled` exactly as a harvest does, so
+     * folding kind into the status enum would make every consumer that switches
+     * on status handle a value that isn't a state.
+     */
+    kind: text("kind").notNull().default("harvest"),
     /** pending | collecting | detecting | completed | failed | cancelled */
     status: text("status").notNull().default("pending"),
     collectorId: text("collector_id").notNull(),
@@ -252,10 +261,52 @@ export const detections = sqliteTable(
 
     /** for_sale | auction | rent | sold | off_market | other | null */
     listingType: text("listing_type"),
+
+    /*
+     * Extraction. Every field here is null unless it was literally written in
+     * the post: `addressText` is the verbatim record and the thing you audit a
+     * verdict against, and the structured components are parsed out of it so
+     * the feed can be filtered and grouped. Nothing is inferred — a postcode
+     * the post didn't write stays null rather than being looked up, because
+     * the moment one field can be invented none of them can be trusted.
+     */
+    addressText: text("address_text"),
+    unit: text("unit"),
+    streetNumber: text("street_number"),
+    street: text("street"),
     suburb: text("suburb"),
     state: text("state"),
+    postcode: text("postcode"),
+    /**
+     * Null when unknown; >1 marks a round-up post ("open homes this Saturday")
+     * whose address fields describe only the first property. Without it such a
+     * post is indistinguishable from a single-property listing.
+     */
+    propertyCount: integer("property_count"),
+
+    /** The price exactly as written. Always what the UI renders. */
     priceText: text("price_text"),
+    /* Derived from `priceText` in code, not asked of the model — see lib/property.ts. */
+    priceMin: integer("price_min"),
+    priceMax: integer("price_max"),
+    /** once | week | month | year. Rent is weekly unless the post says otherwise. */
+    pricePeriod: text("price_period"),
+    /** ISO code, AUD unless the post says otherwise. */
+    priceCurrency: text("price_currency"),
+    /** exact | from | range | offers_over | guide | undisclosed | contact_agent */
+    priceQualifier: text("price_qualifier"),
+
     agency: text("agency"),
+
+    /**
+     * Which prompt produced this verdict.
+     *
+     * Provenance, in the same category as `detectorId` and `model`: the prompt
+     * is at least as large a determinant of a verdict as the model is, and was
+     * previously the only input that left no trace. Also the predicate the
+     * re-detection tool selects on.
+     */
+    promptVersion: integer("prompt_version").notNull().default(1),
 
     costUsd: real("cost_usd"),
     /** true when this verdict came from the per-post fallback path. */
@@ -267,6 +318,7 @@ export const detections = sqliteTable(
     index("detections_post_idx").on(t.postId, t.createdAt),
     index("detections_verified_idx").on(t.isListing, t.isAustralia),
     index("detections_run_idx").on(t.runId),
+    index("detections_prompt_version_idx").on(t.promptVersion),
   ],
 );
 

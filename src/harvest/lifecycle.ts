@@ -115,8 +115,10 @@ export const activeRun = () =>
   db
     .select({
       id: runs.id,
+      kind: runs.kind,
       status: runs.status,
       collectorId: runs.collectorId,
+      detectorId: runs.detectorId,
       postsSeen: runs.postsSeen,
       postsNew: runs.postsNew,
       postsDetected: runs.postsDetected,
