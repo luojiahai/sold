@@ -144,13 +144,11 @@
   <!-- 2 -->
   <section class="slide">
     <div class="label">The pipeline</div>
-    <h2 style="margin-bottom:clamp(12px,2vw,24px)">Five steps. One touches Instagram.</h2>
+    <h2 style="margin-bottom:clamp(12px,2vw,24px)">Four steps. One touches Instagram.</h2>
     <div class="flow">
       <div class="node"><b>Seed terms</b><span>hashtags &amp; keywords</span></div>
       <div class="arrow">&rarr;</div>
       <div class="node hot"><b>Collector</b><span>fetches posts from Instagram</span></div>
-      <div class="arrow">&rarr;</div>
-      <div class="node"><b>Posts</b><span>caption, author, date</span></div>
       <div class="arrow">&rarr;</div>
       <div class="node"><b>Detector</b><span>Claude reads each one</span></div>
       <div class="arrow">&rarr;</div>
@@ -159,9 +157,7 @@
     <div class="flow-notes">
       <div class="cell"><b>A list we maintain.</b> Hashtags such as #justlisted, #offmarket, #sydneyrealestate, plus keyword phrases. Every run walks all of them; the list can grow.</div>
       <div class="spacer"></div>
-      <div class="cell"><b>The only step that talks to Instagram.</b> For each term it pulls the newest matching posts, page by page, until it hits a budget or reaches posts we already have. Swappable: the three options in this deck.</div>
-      <div class="spacer"></div>
-      <div class="cell"><b>Saved once, in our database.</b> Caption, author, date, location tag and image. De-duplicated across terms and runs, so nothing is counted twice.</div>
+      <div class="cell"><b>The only step that talks to Instagram.</b> For each term it pulls the newest matching posts, page by page, until it hits a budget or reaches posts we already have. Each post is saved once. Swappable: the three options in this deck.</div>
       <div class="spacer"></div>
       <div class="cell"><b>Claude reads each new post</b> and answers two questions: is it a real property listing, and is it in Australia? It also pulls out address, price and suburb when they are written in the post. About 1&cent; per post.</div>
       <div class="spacer"></div>
