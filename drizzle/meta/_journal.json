@@ -15,6 +15,13 @@
       "when": 1787742244880,
       "tag": "0001_heartbeat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787794868563,
+      "tag": "0002_watery_talkback",
+      "breakpoints": true
     }
   ]
 }

@@ -495,8 +495,13 @@ tbody tr:hover { background: var(--panel-2); }
   text-decoration: none;
   color: inherit;
 }
-.rows { --feed-cols: 38px minmax(0, 1fr) 116px 92px 96px 52px 48px; }
+.rows { --feed-cols: 38px minmax(0, 1fr) 176px 92px 96px 52px 48px; }
 .post-row:last-child { border-bottom: none; }
+.redetect-idle { margin: 22px 0 6px; }
+.redetect-idle > summary { cursor: pointer; list-style: none; }
+.redetect-idle > summary::-webkit-details-marker { display: none; }
+.redetect-idle > summary::before { content: "▸ "; }
+.redetect-idle[open] > summary::before { content: "▾ "; }
 .post-row:hover { background: var(--panel-2); color: inherit; }
 .post-row.k-ok { border-left-color: var(--ok); }
 .post-row.k-bad { border-left-color: var(--bad); }

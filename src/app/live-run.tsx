@@ -7,10 +7,14 @@ import { money } from "./format";
 
 export interface LiveRunSnapshot {
   id: string;
+  /** harvest | redetect */
+  kind: string;
   status: string;
   collectorId: string;
+  detectorId: string;
   postsSeen: number;
   postsNew: number;
+  postsDetected: number;
   postsVerified: number;
   detectorCostUsd: number;
   stalled: boolean;
@@ -66,15 +70,29 @@ export function LiveRun({ initial }: { initial: LiveRunSnapshot }) {
 
   if (!live) return null;
 
+  // A re-detection collects nothing, so seen/new would both read zero for its
+  // entire duration. It reports what it is actually doing instead.
+  const redetect = run.kind === "redetect";
+
   return (
     <Link href={`/runs/${run.id}`} className={`live-strip${run.stalled ? " stalled" : ""}`}>
       <span className={`pulse${run.stalled ? " warn" : ""}`} aria-hidden="true" />
-      <b>{run.stalled ? "Run stalled" : `Harvest ${run.status}`}</b>
-      <span className="mono">{run.collectorId}</span>
+      <b>
+        {run.stalled
+          ? "Run stalled"
+          : `${redetect ? "Re-detection" : "Harvest"} ${run.status}`}
+      </b>
+      <span className="mono">{redetect ? run.detectorId : run.collectorId}</span>
       {run.stalled && <span className="tag warn">no progress in 2 min</span>}
       <span className="figures">
-        <span>{run.postsSeen.toLocaleString("en-AU")} seen</span>
-        <span>{run.postsNew.toLocaleString("en-AU")} new</span>
+        {redetect ? (
+          <span>{run.postsDetected.toLocaleString("en-AU")} re-detected</span>
+        ) : (
+          <>
+            <span>{run.postsSeen.toLocaleString("en-AU")} seen</span>
+            <span>{run.postsNew.toLocaleString("en-AU")} new</span>
+          </>
+        )}
         <span>{run.postsVerified.toLocaleString("en-AU")} verified</span>
         <span>{money(run.detectorCostUsd)}</span>
       </span>

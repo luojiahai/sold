@@ -1,7 +1,8 @@
 import "server-only";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { detections, posts } from "@/db/schema";
+import { normaliseState } from "@/lib/property";
 
 export interface FeedFilters {
   /** verified | rejected | all */
@@ -9,6 +10,27 @@ export interface FeedFilters {
   state?: string;
   listingType?: string;
   q?: string;
+  /** "1" to show only listings with a street-level address. */
+  hasAddress?: string;
+}
+
+/**
+ * Every raw spelling that canonicalises to `canonical`.
+ *
+ * State is normalised as verdicts are written, but detections are append-only
+ * and historical rows were written before that — so the column still holds
+ * "Victoria" alongside "VIC". Normalising at read time keeps the filter
+ * dropdown from fragmenting; this is what keeps the filter itself matching the
+ * rows behind those older spellings.
+ */
+function stateVariants(canonical: string): string[] {
+  return db
+    .selectDistinct({ value: detections.state })
+    .from(detections)
+    .where(sql`${detections.state} IS NOT NULL AND ${detections.state} != ''`)
+    .all()
+    .map((row) => row.value!)
+    .filter((value) => normaliseState(value) === canonical);
 }
 
 /**
@@ -29,13 +51,24 @@ export function feedPosts(filters: FeedFilters, limit = 120) {
     conditions.push(and(eq(detections.isListing, true), eq(detections.isAustralia, true))!);
   }
 
-  if (filters.state) conditions.push(eq(detections.state, filters.state));
+  if (filters.state) {
+    const variants = stateVariants(filters.state);
+    conditions.push(
+      variants.length > 0 ? inArray(detections.state, variants) : sql`1 = 0`,
+    );
+  }
   if (filters.listingType) conditions.push(eq(detections.listingType, filters.listingType));
+  // `street` rather than `addressText`: a post can write "West Melbourne VIC"
+  // as its address, and that is a locality, not somewhere you can knock.
+  if (filters.hasAddress === "1") conditions.push(sql`${detections.street} IS NOT NULL`);
   if (filters.q) {
     const like = `%${filters.q}%`;
     conditions.push(
       sql`(${posts.text} LIKE ${like} COLLATE NOCASE
         OR ${detections.suburb} LIKE ${like} COLLATE NOCASE
+        OR ${detections.street} LIKE ${like} COLLATE NOCASE
+        OR ${detections.addressText} LIKE ${like} COLLATE NOCASE
+        OR ${detections.postcode} LIKE ${like} COLLATE NOCASE
         OR ${detections.agency} LIKE ${like} COLLATE NOCASE
         OR ${posts.authorHandle} LIKE ${like} COLLATE NOCASE)`,
     );
@@ -55,8 +88,12 @@ export function feedPosts(filters: FeedFilters, limit = 120) {
       confidence: detections.confidence,
       reason: detections.reason,
       listingType: detections.listingType,
+      addressText: detections.addressText,
+      street: detections.street,
       suburb: detections.suburb,
       state: detections.state,
+      postcode: detections.postcode,
+      propertyCount: detections.propertyCount,
       priceText: detections.priceText,
       agency: detections.agency,
     })
@@ -65,7 +102,11 @@ export function feedPosts(filters: FeedFilters, limit = 120) {
     .where(and(...conditions))
     .orderBy(desc(sql`COALESCE(${posts.postedAt}, ${posts.collectedAt})`))
     .limit(limit)
-    .all();
+    .all()
+    // Older verdicts wrote the state however the model phrased it. Show the
+    // canonical form when it is recognisable, and the row as written when it
+    // isn't — the stored value is never touched either way.
+    .map((row) => ({ ...row, state: normaliseState(row.state) ?? row.state }));
 }
 
 export function feedStats() {
@@ -91,13 +132,20 @@ export function feedStats() {
 }
 
 export function distinctValues() {
-  const states = db
-    .selectDistinct({ value: detections.state })
-    .from(detections)
-    .where(sql`${detections.state} IS NOT NULL AND ${detections.state} != ''`)
-    .all()
-    .map((r) => r.value!)
-    .sort();
+  // Normalised and de-duplicated here rather than rewritten in the table:
+  // detections are append-only, and a migration that edited historical verdicts
+  // would break the head-to-head comparability that invariant exists to give.
+  const states = [
+    ...new Set(
+      db
+        .selectDistinct({ value: detections.state })
+        .from(detections)
+        .where(sql`${detections.state} IS NOT NULL AND ${detections.state} != ''`)
+        .all()
+        .map((r) => normaliseState(r.value))
+        .filter((v) => v !== null),
+    ),
+  ].sort();
 
   const types = db
     .selectDistinct({ value: detections.listingType })

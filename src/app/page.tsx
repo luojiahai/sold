@@ -8,6 +8,23 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
 
+/**
+ * What to show as the post's place.
+ *
+ * The verbatim address when the post wrote one, the locality when it didn't.
+ * Off-market teasers withhold the street on purpose, so a card with only a
+ * suburb is a normal result rather than a gap.
+ */
+function placeLabel(post: {
+  addressText: string | null;
+  suburb: string | null;
+  state: string | null;
+}): string | null {
+  if (post.addressText) return post.addressText;
+  if (!post.suburb) return null;
+  return post.state ? `${post.suburb}, ${post.state}` : post.suburb;
+}
+
 /** Layout is a link, not client state, so a chosen view survives a reload. */
 function layoutHref(filters: Record<string, string>, layout: string) {
   const params = new URLSearchParams();
@@ -25,6 +42,7 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
     state: one(params.state),
     listingType: one(params.listingType),
     q: one(params.q),
+    hasAddress: one(params.hasAddress),
   };
 
   const results = feedPosts(filters);
@@ -83,7 +101,7 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
             type="text"
             name="q"
             defaultValue={filters.q}
-            placeholder="Suburb, agency, handle, caption text…"
+            placeholder="Address, suburb, postcode, agency, handle, caption…"
           />
         </div>
         <div className="field fixed">
@@ -114,6 +132,13 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
                 {LISTING_TYPE_LABELS[t] ?? t}
               </option>
             ))}
+          </select>
+        </div>
+        <div className="field fixed">
+          <label htmlFor="hasAddress">Address</label>
+          <select id="hasAddress" name="hasAddress" defaultValue={filters.hasAddress}>
+            <option value="">Any</option>
+            <option value="1">Full street address only</option>
           </select>
         </div>
         <button className="primary" type="submit">
@@ -173,10 +198,14 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
                         {post.isListing ? "Not AU" : "Not listing"}
                       </span>
                     )}
-                    {post.suburb && (
-                      <span className="tag place">
-                        {post.suburb}
-                        {post.state ? `, ${post.state}` : ""}
+                    {placeLabel(post) && (
+                      <span className="tag place" title={placeLabel(post)!}>
+                        {placeLabel(post)}
+                      </span>
+                    )}
+                    {(post.propertyCount ?? 1) > 1 && (
+                      <span className="tag warn" title="This post advertises several properties; the address shown is the first.">
+                        +{post.propertyCount! - 1} more
                       </span>
                     )}
                     <span className="tag mono conf">{post.confidence}%</span>
@@ -200,7 +229,7 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
           <div className="head" aria-hidden="true">
             <span />
             <span>Caption</span>
-            <span className="hide-sm">Suburb</span>
+            <span className="hide-sm">Address</span>
             <span className="hide-sm">Verdict</span>
             <span className="hide-sm">Price</span>
             <span className="num">Conf</span>
@@ -228,10 +257,8 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
                 <span className="caption" title={post.text || undefined}>
                   {post.text || "No caption"}
                 </span>
-                <span className="place hide-sm">
-                  {post.suburb
-                    ? `${post.suburb}${post.state ? `, ${post.state}` : ""}`
-                    : "—"}
+                <span className="place hide-sm" title={placeLabel(post) ?? undefined}>
+                  {placeLabel(post) ?? "—"}
                 </span>
                 <span className="hide-sm">
                   {verified ? (

@@ -24,6 +24,9 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
     .all();
 
   const terms = db.select().from(runTerms).where(eq(runTerms.runId, id)).all();
+  // A re-detection collects nothing, so it has no terms — and an empty
+  // "no terms yet" section would read as work still to come.
+  const redetect = run.kind === "redetect";
   const truncated = terms.filter((t) => t.terminationReason === "budget_exhausted").length;
 
   return (
@@ -33,12 +36,18 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       </p>
       <div className="page-head">
         <h1>
-          Run <span className="mono">{run.id.slice(0, 8)}</span>
+          {redetect ? "Re-detection" : "Run"}{" "}
+          <span className="mono">{run.id.slice(0, 8)}</span>
         </h1>
         <p className="lede">
-          <span className="mono">{run.collectorId}</span> →{" "}
+          {!redetect && (
+            <>
+              <span className="mono">{run.collectorId}</span> →{" "}
+            </>
+          )}
           <span className="mono">{run.detectorId}</span> · {run.sinceDate} to{" "}
           {run.untilDate}
+          {redetect && " (the span of the posts it re-read)"}
         </p>
       </div>
 
@@ -60,8 +69,8 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
 
       <RunMonitor runId={run.id} initialRun={run} initialEvents={events} />
 
-      <h2>Per-term outcome</h2>
-      {terms.length === 0 ? (
+      {!redetect && <h2>Per-term outcome</h2>}
+      {redetect ? null : terms.length === 0 ? (
         <p className="small muted">No terms have finished yet.</p>
       ) : (
         <>

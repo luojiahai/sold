@@ -5,9 +5,11 @@ import { keywords, runs } from "@/db/schema";
 import { COLLECTORS } from "@/collectors/registry";
 import { DETECTORS } from "@/detectors/registry";
 import { money, relativeTime } from "../format";
-import { isStalled } from "@/harvest/lifecycle";
+import { activeRunCount, isStalled } from "@/harvest/lifecycle";
+import { REDETECT_SCOPES, estimatedCostPerPost, redetectCount } from "@/harvest/redetect";
 import { cancelRun } from "./cancel-action";
 import { NewRunForm } from "./new-run-form";
+import { RedetectPanel } from "./redetect-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,20 @@ export default async function RunsPage() {
     costTier: c.capabilities.costTier,
     supportsDateCutoff: c.capabilities.supportsDateCutoff,
   }));
+
+  // Counts are per (detector, scope) because "stale" is defined against the
+  // detector's own prompt version, not a global one.
+  const redetectDetectors = DETECTORS.filter((d) => d.implemented).map((d) => ({
+    id: d.id,
+    name: d.name,
+    promptVersion: d.promptVersion,
+    counts: Object.fromEntries(
+      REDETECT_SCOPES.map((scope) => [scope.id, redetectCount(scope.id, d.promptVersion)]),
+    ),
+  }));
+  // `stale_all` contains `stale_verified`, so it alone answers "is anything
+  // out of date?".
+  const staleTotal = redetectDetectors.reduce((n, d) => n + (d.counts.stale_all ?? 0), 0);
 
   const detectors = DETECTORS.map((d) => ({
     id: d.id,
@@ -61,6 +77,16 @@ export default async function RunsPage() {
         enabledHashtags={enabled.filter((k) => k.kind === "hashtag").length}
         enabledKeywords={enabled.filter((k) => k.kind === "keyword").length}
       />
+
+      {redetectDetectors.length > 0 && (
+        <RedetectPanel
+          detectors={redetectDetectors}
+          scopes={REDETECT_SCOPES}
+          costPerPost={estimatedCostPerPost()}
+          runActive={activeRunCount() > 0}
+          staleTotal={staleTotal}
+        />
+      )}
 
       <h2>History</h2>
       {history.length === 0 ? (
@@ -96,10 +122,13 @@ export default async function RunsPage() {
                       <span className={`tag ${STATUS_TONE[run.status] ?? ""}`}>
                         {run.status}
                       </span>
+                      {run.kind !== "harvest" && <span className="tag">{run.kind}</span>}
                       {isStalled(run) && <span className="tag warn">stalled</span>}
                     </div>
                   </td>
-                  <td className="mono">{run.collectorId}</td>
+                  <td className="mono">
+                    {run.collectorId === "none" ? "—" : run.collectorId}
+                  </td>
                   <td className="mono">{run.detectorId}</td>
                   <td className="mono">
                     {run.sinceDate} → {run.untilDate}

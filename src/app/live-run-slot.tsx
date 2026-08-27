@@ -10,10 +10,13 @@ export function LiveRunSlot() {
     <LiveRun
       initial={{
         id: run.id,
+        kind: run.kind,
         status: run.status,
         collectorId: run.collectorId,
+        detectorId: run.detectorId,
         postsSeen: run.postsSeen,
         postsNew: run.postsNew,
+        postsDetected: run.postsDetected,
         postsVerified: run.postsVerified,
         detectorCostUsd: run.detectorCostUsd,
         stalled: isStalled(run),

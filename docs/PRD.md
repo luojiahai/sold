@@ -45,7 +45,9 @@ The prototype succeeds if it produces a defensible answer to "is there enough un
 
 ### Explicit non-goals
 
-Deduplicating against portal listings · address resolution and geocoding · alerting and saved searches · multi-tenancy · anything resembling production infrastructure.
+Deduplicating against portal listings · **resolving or geocoding** an address — turning it into coordinates, validating it against a gazetteer, or completing the parts a post left out · alerting and saved searches · multi-tenancy · anything resembling production infrastructure.
+
+Extracting an address a post *wrote* is in scope and is what the detector does. Working out an address a post *didn't* write is not.
 
 ## 4. Architecture
 
@@ -101,7 +103,15 @@ The detector answers **two separate booleans**:
 
 Collapsing these would destroy the diagnostic signal. A Portland bungalow listing and a mortgage-broker ad both fail the filter, but they fail for opposite reasons: one is a seed-list problem, the other is a prompt problem. The run stats show that split.
 
-The same call also extracts `listingType`, `suburb`, `state`, `priceText`, and `agency` — near-zero marginal cost once the model has read the caption, and the difference between a browsable feed and a list of links.
+The same call also extracts the listing's **address and price** — near-zero marginal cost once the model has read the caption, and the difference between a browsable feed and a list of links. `addressText` holds the address exactly as the post wrote it and `unit`/`streetNumber`/`street`/`suburb`/`state`/`postcode` hold it segmented; `priceText` likewise holds the price verbatim, with `priceMin`/`priceMax`/`pricePeriod`/`priceCurrency`/`priceQualifier` derived from it. `listingType`, `agency` and `propertyCount` complete the set.
+
+**Extraction is strictly verbatim: a field the post did not write is null.** The model is told this repeatedly and told not to complete a postcode it happens to know. This is the property that makes a verdict auditable — `addressText` can be diffed against the caption — and it is all-or-nothing, because one invented field makes every sibling field indistinguishable from a real one. Suburb-to-postcode is a deterministic table join and belongs in code, if it is ever wanted at all. The platform's location tag is allowed to supply `suburb` and `state` but never a street-level field: it is chosen from a gazetteer and is routinely the agency's office rather than the property.
+
+Nothing derived is asked of the model. The price numerics are parsed from `priceText` and the state is canonicalised to its abbreviation by `src/lib/property.ts` — pure functions with a test table, because a parser can be verified exhaustively and a prompt can only be hoped at. A post advertising several properties records `propertyCount` and extracts the first; partial data, flagged as partial rather than passed off as complete.
+
+Round-up posts aside, `isListing` and `isAustralia` are untouched by any of this. A listing with no street address — which is most off-market stock, deliberately — is still a listing.
+
+That is true of the instructions but not guaranteed of the behaviour. Re-detecting 26 posts across the v1 → v2 prompt change moved one verdict: a stamp-duty promotion across a development's remaining apartments went from listing (65%) to not-a-listing (70%). The classification text was byte-identical; the plausible mechanism is that pressing hard on "extract *the* address" makes "which property is this?" salient, and a post with no single property then reads as not a listing. Arguably the newer answer is the better one — v1's own reason had already conceded "a general stamp-duty offer rather than a single unit" — but the lesson stands: extraction pressure leaks into classification at the margin, so a prompt change is never purely additive and `promptVersion` is what lets you find the posts where it showed.
 
 | Detector | Status | Notes |
 |---|---|---|
@@ -110,6 +120,8 @@ The same call also extracts `listingType`, `suburb`, `state`, `priceText`, and `
 | `anthropic-api` | Placeholder | Metered API; the volume path |
 
 Detections are stored **append-only**, one row per (post, detector, run). A re-run under a different detector adds a verdict rather than replacing one, which is what makes two detectors comparable head-to-head — the entire reason detection is an interface.
+
+Every verdict also records `promptVersion`. The prompt is at least as large a determinant of an answer as the model is, and it was previously the only input to a detection that left no trace — two verdicts months apart were indistinguishable in the table even though they had been asked different questions. It is also the predicate **re-detection** selects on: the Runs page can replay already-collected posts through the current prompt, scoped cheapest-first to stale verified listings, all stale verdicts, or every verified listing regardless of version. Selection is keyed on the version rather than on which fields are null, because nullness cannot tell "never asked" apart from "asked, and the post genuinely didn't say" — an off-market teaser with no address would otherwise be re-detected forever. A re-detection is a real `runs` row (`kind = 'redetect'`) so its spend lands in the same ledger as everything else, and it goes through the normal lifecycle, so heartbeats, cancellation and orphan reconciliation need no special case.
 
 Reliability: batches of ~10 with 3 concurrent calls; a batch that fails to parse retries once, then falls back to per-post calls, so one malformed caption cannot poison nine good ones. A model that silently drops a post from its response fails the batch rather than leaving that post permanently undetected.
 
@@ -133,7 +145,7 @@ Reliability: batches of ~10 with 3 concurrent calls; a batch that fails to parse
 |---|---|
 | `posts` | Normalised, immutable post record |
 | `detections` | Append-only verdicts, one per (post, detector, run) |
-| `runs` | Harvest execution: status, counters, detector cost in USD |
+| `runs` | Execution record — `kind` harvest or redetect: status, counters, detector cost in USD |
 | `run_terms` | Per-term outcome **including termination reason** |
 | `run_posts` | Which run saw which post via which term — survives dedup |
 | `run_events` | Append-only progress log |
@@ -158,7 +170,22 @@ Endpoints and payload shapes move without notice. Mitigation: instagrapi is a ma
 
 ### 6.3 Detection blind spot
 
-A significant share of Australian agency posts put the address, price, and auction time **in the image**, with a caption that is emojis and hashtags. Text-only detection misses those systematically. The multimodal detector placeholder exists to measure that gap: run both over the same post set and compare. *How much recall does caption-only detection cost?* is a finding this prototype should produce.
+The hypothesis was that a significant share of Australian agency posts put the address, price, and auction time **in the image**, with a caption that is emojis and hashtags, and that text-only detection would miss those systematically.
+
+**Measured, and it is half right.** Re-detecting the corpus at prompt version 2 (2026-08-27, n = 25 verified listings):
+
+| Field | Present in caption |
+|---|---|
+| Full street address | **24 / 25 — 96%** |
+| State | 5 / 25 — 20% |
+| Postcode | 1 / 25 — 4% |
+| **Price** | **4 / 25 — 16%** |
+
+Addresses are not the blind spot. They are in the caption almost every time, typically immediately after a 📍. What is systematically absent is the **price**: five posts in six state one nowhere in the text, and the number sits in the graphic alongside the auction time.
+
+That sharpens the multimodal case rather than weakening it. The question is no longer the diffuse "how much recall does caption-only detection cost?" but the specific "how many listings are priceless in the database but priced in the image?" — a claim that can be tested field-by-field on the same post set rather than argued.
+
+Two caveats. n = 25 is small, and it is one seed list's worth of posts, weighted toward agency accounts that caption diligently; a wider crawl could move it. And the address figure counts a *street* address, not a complete one — state is present 20% of the time and postcode 4%, so "96% addressable" does not mean "96% resolvable".
 
 ### 6.4 Session mortality
 
@@ -175,7 +202,7 @@ Runs execute in-process and die with the server. The `runs` table is the mitigat
 **Now (prototype):** Instagram cookie collector, Claude CLI detector, web UI. → *Is there supply?*
 
 **Next, if validated:**
-1. Multimodal detector — measure the caption-only recall gap.
+1. Multimodal detector — read the price out of the graphic. §6.3 measured the gap and it is price-shaped, not address-shaped.
 2. Vendor-API collector — remove the ToS and session-mortality risks.
 3. Portal cross-reference — the uniqueness question, and the actual product claim.
 4. Address resolution and geocoding.
@@ -188,7 +215,7 @@ Runs execute in-process and die with the server. The `runs` table is the mitigat
 2. What is the real per-post cost at batch size 10 across a full run?
 3. How long does a burner session survive at conservative pacing?
 4. What share of verified listings are genuinely absent from REA and Domain?
-5. Does the caption-only blind spot cost 5% of recall or 40%?
+5. ~~Does the caption-only blind spot cost 5% of recall or 40%?~~ **Partly answered (§6.3):** it costs almost nothing on addresses (96% present) and most of the price data (16% present). Open: how much of that missing 84% a multimodal detector actually recovers.
 
 ---
 

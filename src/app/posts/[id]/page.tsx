@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { detections, posts, runPosts } from "@/db/schema";
-import { LISTING_TYPE_LABELS, money, relativeTime } from "../../format";
+import {
+  LISTING_TYPE_LABELS,
+  formatParsedPrice,
+  money,
+  relativeTime,
+} from "../../format";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +30,30 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const sightings = db.select().from(runPosts).where(eq(runPosts.postId, id)).all();
   const latest = verdicts[0];
   const verified = latest?.isListing && latest?.isAustralia;
+
+  /**
+   * Every extracted field, nulls included.
+   *
+   * The empty rows are the informative ones: extraction is strictly verbatim,
+   * so "Postcode —" next to a caption that never wrote a postcode is the
+   * detector behaving correctly, and this table beside the caption is where
+   * that can actually be checked.
+   */
+  const extracted: Array<[string, string | null]> = latest
+    ? [
+        ["Address (as written)", latest.addressText],
+        ["Unit", latest.unit],
+        ["Street number", latest.streetNumber],
+        ["Street", latest.street],
+        ["Suburb", latest.suburb],
+        ["State", latest.state],
+        ["Postcode", latest.postcode],
+        ["Properties in post", latest.propertyCount?.toLocaleString("en-AU") ?? null],
+        ["Price (as written)", latest.priceText],
+        ["Price parsed", formatParsedPrice(latest)],
+        ["Agency", latest.agency],
+      ]
+    : [];
 
   return (
     <>
@@ -77,10 +106,15 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                     {LISTING_TYPE_LABELS[latest.listingType] ?? latest.listingType}
                   </span>
                 )}
-                {latest.suburb && (
+                {(latest.addressText || latest.suburb) && (
                   <span className="tag">
-                    {latest.suburb}
-                    {latest.state ? `, ${latest.state}` : ""}
+                    {latest.addressText ??
+                      `${latest.suburb}${latest.state ? `, ${latest.state}` : ""}`}
+                  </span>
+                )}
+                {(latest.propertyCount ?? 1) > 1 && (
+                  <span className="tag warn">
+                    {latest.propertyCount} properties — address is the first
                   </span>
                 )}
                 {latest.priceText && <span className="tag mono">{latest.priceText}</span>}
@@ -94,6 +128,24 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           <div className="caption-block">
             {post.text || <em className="muted">No caption</em>}
           </div>
+
+          {latest && (
+            <>
+              <h2>Extracted</h2>
+              <div className="table-wrap">
+                <table>
+                  <tbody>
+                    {extracted.map(([label, value]) => (
+                      <tr key={label}>
+                        <td className="nowrap">{label}</td>
+                        <td className={value ? "mono" : "mono muted"}>{value ?? "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
 
           {post.hashtags.length > 0 && (
             <div className="row" style={{ gap: 4, marginTop: 12 }}>
@@ -113,6 +165,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                   <th>When</th>
                   <th>Detector</th>
                   <th>Model</th>
+                  <th>Prompt</th>
                   <th>Listing</th>
                   <th>AU</th>
                   <th className="num">Conf.</th>
@@ -126,6 +179,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                     <td className="nowrap">{relativeTime(verdict.createdAt)}</td>
                     <td className="mono">{verdict.detectorId}</td>
                     <td className="mono">{verdict.model ?? "—"}</td>
+                    <td className="mono">v{verdict.promptVersion}</td>
                     <td>
                       <span className={`tag ${verdict.isListing ? "ok" : "bad"}`}>
                         {verdict.isListing ? "yes" : "no"}

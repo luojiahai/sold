@@ -3,16 +3,15 @@ import { runs } from "@/db/schema";
 import { getCollector } from "@/collectors/registry";
 import { getDetector } from "@/detectors/registry";
 import type { CollectorTerm, TermKind, TerminationReason } from "@/collectors/types";
-import type { DetectorInput } from "@/detectors/types";
 import { cacheThumbnail } from "@/media/cache";
 import { newId, nowIso } from "@/lib/id";
 import { RunCancelled, isCancelled, touchHeartbeat } from "./lifecycle";
+import { runDetectionPhase, toDetectorInput } from "./detect-phase";
 import {
   bumpRunCounters,
   linkRunPost,
   logEvent,
   recordTerm,
-  saveDetection,
   undetectedPosts,
   updateRun,
   upsertPost,
@@ -37,6 +36,7 @@ export function createRun(config: HarvestConfig): string {
   db.insert(runs)
     .values({
       id,
+      kind: "harvest",
       status: "pending",
       heartbeatAt: nowIso(),
       collectorId: config.collectorId,
@@ -164,48 +164,7 @@ export async function executeRun(runId: string, config: HarvestConfig): Promise<
     } else {
       logEvent(runId, "detect", `${queue.length} undetected post(s) queued for ${detector.name}.`);
 
-      const inputs: DetectorInput[] = queue.map((row) => ({
-        postId: row.postId,
-        text: row.text,
-        authorHandle: row.authorHandle,
-        hashtags: row.hashtags ?? [],
-        locationName: row.locationName,
-        postedAt: row.postedAt,
-        url: row.url,
-        thumbnailPath: row.thumbnailPath,
-      }));
-
-      for await (const event of detector.detect(inputs)) {
-        if (isCancelled(runId)) throw new RunCancelled();
-        if (event.type === "log") {
-          logEvent(runId, "detect", event.message, event.level);
-          continue;
-        }
-
-        let verified = 0;
-        for (const verdict of event.verdicts) {
-          // Cost is reported per call, so attribute it evenly across the batch.
-          saveDetection(
-            verdict,
-            runId,
-            detector.id,
-            detector.model,
-            event.costUsd / Math.max(event.verdicts.length, 1),
-          );
-          if (verdict.isListing && verdict.isAustralia) verified += 1;
-        }
-
-        bumpRunCounters(
-          runId,
-          { postsDetected: event.verdicts.length, postsVerified: verified },
-          event.costUsd,
-        );
-        logEvent(
-          runId,
-          "detect",
-          `Batch of ${event.verdicts.length}: ${verified} verified as Australian listings ($${event.costUsd.toFixed(4)}).`,
-        );
-      }
+      await runDetectionPhase(runId, detector, queue.map(toDetectorInput));
     }
 
     updateRun(runId, { status: "completed", finishedAt: nowIso() });
