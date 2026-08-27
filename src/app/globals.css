@@ -4,7 +4,7 @@
 
    Two colour systems share the page and never overlap. Green, amber and red
    are reserved for verdict and run state — chips, keylines, the stacked
-   verdict bar. Interaction is carried by a single ultramarine accent, which
+   verdict bar. Interaction is carried by a single burnt-orange accent, which
    also stands for "live": a run in progress is activity, not a verdict, so
    it borrows the interaction hue rather than a fourth state colour.
 
@@ -28,16 +28,16 @@
   --text-faint: #65706a;
 
   /* interaction + live */
-  --accent: #3a4fbf;
+  --accent: #b9400c;
   --accent-fg: #ffffff;
-  --accent-bg: #e6eafa;
-  --focus: #3a4fbf;
+  --accent-bg: #fce9de;
+  --focus: #b9400c;
 
   /* state — verdicts and run outcomes only */
   --ok: #1b7a4b;
   --ok-bg: #dbf2e4;
   --warn: #8f5c0c;
-  --warn-bg: #faecd0;
+  --warn-bg: #faefc8;
   --bad: #b23a2c;
   --bad-bg: #fadfdb;
 
@@ -79,10 +79,10 @@
     --text-dim: #a5afa9;
     --text-faint: #8a958f;
 
-    --accent: #93a1ff;
+    --accent: #f2925a;
     --accent-fg: #0f1412;
-    --accent-bg: #232a4a;
-    --focus: #93a1ff;
+    --accent-bg: #3d2117;
+    --focus: #f2925a;
 
     --ok: #6ed69c;
     --ok-bg: #153322;
@@ -111,10 +111,10 @@
   --text-dim: #a5afa9;
   --text-faint: #8a958f;
 
-  --accent: #93a1ff;
+  --accent: #f2925a;
   --accent-fg: #0f1412;
-  --accent-bg: #232a4a;
-  --focus: #93a1ff;
+  --accent-bg: #3d2117;
+  --focus: #f2925a;
 
   --ok: #6ed69c;
   --ok-bg: #153322;
