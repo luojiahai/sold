@@ -63,7 +63,11 @@
   .flow .node span { font-size: clamp(12px, 1.44vw, 19px); color: var(--muted); }
   .flow .node.hot { border-color: var(--accent); border-width: 2px; }
   .flow .node.hot b { color: var(--accent); }
-  .flow .arrow { color: var(--muted); font-size: clamp(18px, 2.5vw, 30px); }
+  .flow .arrow { color: var(--muted); font-size: clamp(18px, 2.5vw, 30px); width: clamp(20px, 2.6vw, 32px); text-align: center; flex: 0 0 auto; }
+  .flow-notes { display: flex; align-items: flex-start; gap: clamp(6px, 1vw, 14px); margin-top: clamp(12px, 1.8vw, 22px); }
+  .flow-notes .cell { flex: 1; min-width: 0; font-size: clamp(13px, 1.4vw, 17px); color: var(--muted); line-height: 1.4; }
+  .flow-notes .cell b { color: var(--text); font-weight: 600; }
+  .flow-notes .spacer { width: clamp(20px, 2.6vw, 32px); flex: 0 0 auto; }
 
   /* option top: text left, diagram right */
   .opt-top { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(16px, 3vw, 40px); align-items: center; }
@@ -140,9 +144,9 @@
   <!-- 2 -->
   <section class="slide">
     <div class="label">The pipeline</div>
-    <h2>Five steps. One touches Instagram.</h2>
+    <h2 style="margin-bottom:clamp(12px,2vw,24px)">Five steps. One touches Instagram.</h2>
     <div class="flow">
-      <div class="node"><b>Seed terms</b><span>29 hashtags &amp; keywords</span></div>
+      <div class="node"><b>Seed terms</b><span>hashtags &amp; keywords</span></div>
       <div class="arrow">&rarr;</div>
       <div class="node hot"><b>Collector</b><span>fetches posts from Instagram</span></div>
       <div class="arrow">&rarr;</div>
@@ -152,7 +156,17 @@
       <div class="arrow">&rarr;</div>
       <div class="node"><b>Verified listing</b><span>real, and in Australia</span></div>
     </div>
-    <p style="margin-top:clamp(18px,3vw,40px)">The collector is swappable. Everything after it stays the same.</p>
+    <div class="flow-notes">
+      <div class="cell"><b>A list we maintain.</b> Hashtags such as #justlisted, #offmarket, #sydneyrealestate, plus keyword phrases. Every run walks all of them; the list can grow.</div>
+      <div class="spacer"></div>
+      <div class="cell"><b>The only step that talks to Instagram.</b> For each term it pulls the newest matching posts, page by page, until it hits a budget or reaches posts we already have. Swappable: the three options in this deck.</div>
+      <div class="spacer"></div>
+      <div class="cell"><b>Saved once, in our database.</b> Caption, author, date, location tag and image. De-duplicated across terms and runs, so nothing is counted twice.</div>
+      <div class="spacer"></div>
+      <div class="cell"><b>Claude reads each new post</b> and answers two questions: is it a real property listing, and is it in Australia? It also pulls out address, price and suburb when they are written in the post. About 1&cent; per post.</div>
+      <div class="spacer"></div>
+      <div class="cell"><b>Passed both checks.</b> Shows up in the feed. Everything else is kept but hidden, so a wrong call can be re-checked later without collecting again.</div>
+    </div>
     <div class="num"></div>
   </section>
 
@@ -358,7 +372,7 @@
       <span><i style="background:#bbbbbb"></i>Detection &middot; $520, every option</span>
       <span><i style="background:#1a56db"></i>Collection</span>
     </div>
-    <p class="note"><b>Volume.</b> 29 terms &times; 60 posts &times; one sweep a day &asymp; 50,000 posts/month; double every bar for two sweeps. <b>Detection</b> is $0.0104 per post, measured from our own runs on Sonnet 5, and is the biggest line for options 1 and 2.</p>
+    <p class="note"><b>Volume.</b> The current 29 terms &times; 60 posts &times; one sweep a day &asymp; 50,000 posts/month; double every bar for two sweeps. <b>Detection</b> is $0.0104 per post, measured from our own runs on Sonnet 5, and is the biggest line for options 1 and 2.</p>
     <div class="num"></div>
   </section>
 
