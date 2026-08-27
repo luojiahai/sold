@@ -35,20 +35,28 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         <Link href="/runs">← All runs</Link>
       </p>
       <div className="page-head">
-        <h1>
-          {redetect ? "Re-detection" : "Run"}{" "}
-          <span className="mono">{run.id.slice(0, 8)}</span>
-        </h1>
-        <p className="lede">
-          {!redetect && (
-            <>
-              <span className="mono">{run.collectorId}</span> →{" "}
-            </>
-          )}
-          <span className="mono">{run.detectorId}</span> · {run.sinceDate} to{" "}
-          {run.untilDate}
-          {redetect && " (the span of the posts it re-read)"}
-        </p>
+        <div>
+          <h1>
+            {redetect ? "Re-detection" : "Run"}{" "}
+            <span className="mono">{run.id.slice(0, 8)}</span>
+          </h1>
+          <p className="lede">
+            {!redetect && (
+              <>
+                <span className="mono">{run.collectorId}</span> →{" "}
+              </>
+            )}
+            <span className="mono">{run.detectorId}</span> · {run.sinceDate} to{" "}
+            {run.untilDate}
+            {redetect && " (the span of the posts it re-read)"}
+          </p>
+        </div>
+        {["pending", "collecting", "detecting"].includes(run.status) && (
+          <form action={cancelRun}>
+            <input type="hidden" name="runId" value={run.id} />
+            <button type="submit">Stop this run</button>
+          </form>
+        )}
       </div>
 
       {isStalled(run) && (
@@ -58,13 +66,6 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
           process running it has almost certainly exited. Stopping it just brings the
           record in line with reality; no work is lost.
         </div>
-      )}
-
-      {["pending", "collecting", "detecting"].includes(run.status) && (
-        <form action={cancelRun} style={{ marginBottom: 12 }}>
-          <input type="hidden" name="runId" value={run.id} />
-          <button type="submit">Stop this run</button>
-        </form>
       )}
 
       <RunMonitor runId={run.id} initialRun={run} initialEvents={events} />

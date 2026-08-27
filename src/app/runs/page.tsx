@@ -62,13 +62,15 @@ export default async function RunsPage() {
   return (
     <>
       <div className="page-head">
-        <h1>Harvest runs</h1>
-        <p className="lede">
-          A run collects posts for a date range, then classifies everything that
-          doesn&apos;t already have a verdict. Collector and detector are both
-          interchangeable — that&apos;s the architecture the prototype exists to
-          demonstrate.
-        </p>
+        <div>
+          <h1>Harvest runs</h1>
+          <p className="lede">
+            A run collects posts for a date range, then classifies everything that
+            doesn&apos;t already have a verdict. Collector and detector are both
+            interchangeable — that&apos;s the architecture the prototype exists to
+            demonstrate.
+          </p>
+        </div>
       </div>
 
       <NewRunForm
@@ -118,7 +120,7 @@ export default async function RunsPage() {
                     <Link href={`/runs/${run.id}`}>{relativeTime(run.startedAt)}</Link>
                   </td>
                   <td>
-                    <div className="row" style={{ gap: 4 }}>
+                    <div className="chips">
                       <span className={`tag ${STATUS_TONE[run.status] ?? ""}`}>
                         {run.status}
                       </span>

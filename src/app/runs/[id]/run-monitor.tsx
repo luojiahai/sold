@@ -105,25 +105,25 @@ export function RunMonitor({
       )}
 
       <div className="stats">
-        <div className="stat">
-          <b>{run.postsSeen.toLocaleString("en-AU")}</b>
-          <span>Collected</span>
+        <div className="tile">
+          <div className="label">Collected</div>
+          <div className="value">{run.postsSeen.toLocaleString("en-AU")}</div>
         </div>
-        <div className="stat">
-          <b>{run.postsNew.toLocaleString("en-AU")}</b>
-          <span>New (deduped)</span>
+        <div className="tile">
+          <div className="label">New (deduped)</div>
+          <div className="value">{run.postsNew.toLocaleString("en-AU")}</div>
         </div>
-        <div className="stat">
-          <b>{run.postsDetected.toLocaleString("en-AU")}</b>
-          <span>Detected</span>
+        <div className="tile">
+          <div className="label">Detected</div>
+          <div className="value">{run.postsDetected.toLocaleString("en-AU")}</div>
         </div>
-        <div className="stat k-ok">
-          <b>{run.postsVerified.toLocaleString("en-AU")}</b>
-          <span>AU listings</span>
+        <div className="tile k-ok">
+          <div className="label">AU listings</div>
+          <div className="value">{run.postsVerified.toLocaleString("en-AU")}</div>
         </div>
-        <div className="stat">
-          <b>${run.detectorCostUsd.toFixed(4)}</b>
-          <span>Detector cost</span>
+        <div className="tile">
+          <div className="label">Detector cost</div>
+          <div className="value">${run.detectorCostUsd.toFixed(4)}</div>
         </div>
       </div>
 

@@ -30,7 +30,7 @@ const LINKS = [
   },
   {
     href: "/keywords",
-    label: "Keywords",
+    label: "Seed terms",
     icon: (
       <svg viewBox="0 0 24 24" {...ICON} aria-hidden="true">
         <path d="M5 3v18M19 3v18M3 8.5h18M3 15.5h18" />
@@ -49,11 +49,16 @@ const LINKS = [
   },
 ];
 
-export function Nav() {
+/**
+ * Section links with a figure beside each: verified listings, live runs,
+ * enabled terms, session health. The figures come from the server so the
+ * sidebar is right on first paint.
+ */
+export function Nav({ badges }: { badges: Record<string, string | undefined> }) {
   const pathname = usePathname();
 
   return (
-    <nav className="nav">
+    <nav className="nav" aria-label="Sections">
       {LINKS.map((link) => (
         <Link
           key={link.href}
@@ -64,6 +69,7 @@ export function Nav() {
         >
           {link.icon}
           {link.label}
+          {badges[link.href] && <span className="count">{badges[link.href]}</span>}
         </Link>
       ))}
     </nav>

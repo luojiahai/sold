@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { distinctValues, feedPosts, feedStats } from "./queries";
-import { LISTING_TYPE_LABELS, relativeTime } from "./format";
+import { detectorSpend, distinctValues, feedPosts, feedStats, verifiedByDay } from "./queries";
+import { LISTING_TYPE_LABELS, money, relativeTime } from "./format";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +33,19 @@ function layoutHref(filters: Record<string, string>, layout: string) {
   return `/?${params.toString()}`;
 }
 
+function VerdictTag({ post }: { post: { isListing: boolean; isAustralia: boolean; listingType: string | null } }) {
+  const verified = post.isListing && post.isAustralia;
+  return verified ? (
+    <span className="tag ok">{LISTING_TYPE_LABELS[post.listingType ?? ""] ?? "Listing"}</span>
+  ) : (
+    <span className="tag bad">{post.isListing ? "Not AU" : "Not a listing"}</span>
+  );
+}
+
 export default async function FeedPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const view = one(params.view) || "verified";
-  const layout = one(params.layout) === "grid" ? "grid" : "rows";
+  const layout = one(params.layout) === "rows" ? "rows" : "cards";
   const filters = {
     view,
     state: one(params.state),
@@ -49,53 +58,108 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
   const stats = feedStats();
   const { states, types } = distinctValues();
   const undetected = stats.total - stats.detected;
+  const precision =
+    stats.detected > 0 ? Math.round((stats.verified / stats.detected) * 100) : null;
+  // Segment widths are shares of everything collected, so the bar and the
+  // "Collected" tile describe the same whole.
+  const share = (n: number) => (stats.total > 0 ? (n / stats.total) * 100 : 0);
+
+  const days = verifiedByDay(7);
+  const peak = Math.max(1, ...days.map((d) => d.count));
+  const week = days.reduce((n, d) => n + d.count, 0);
+  const today = days[days.length - 1].count;
+  const { spend, verdicts } = detectorSpend();
 
   return (
     <>
       <div className="page-head">
-        <h1>Discovered listings</h1>
-        <p className="lede">
-          Australian property found on social media and confirmed by the detector. The
-          rejected view is deliberately one click away — during validation, what the
-          detector throws away is the more informative half.
-        </p>
+        <div>
+          <h1>Discovered listings</h1>
+          <p className="lede">
+            Australian property found on social media and confirmed by the detector. The
+            rejected view is one click away — during validation, what the detector throws
+            away is the more informative half.
+          </p>
+        </div>
+        <Link href="/runs" className="btn primary">
+          Start harvest
+        </Link>
       </div>
 
-      <div className="stats">
-        <div className="stat k-ok">
-          <b>{stats.verified.toLocaleString("en-AU")}</b>
-          <span>AU listings</span>
+      <div className="bento">
+        <div className="tile span-5">
+          <div className="label">Precision</div>
+          <div className="value">
+            {precision === null ? "—" : `${precision}%`}
+            <small>
+              {stats.verified.toLocaleString("en-AU")} of {stats.detected.toLocaleString("en-AU")}{" "}
+              detected
+            </small>
+          </div>
+          <div
+            className="verdict-bar"
+            role="img"
+            aria-label={`${stats.verified} AU listings, ${stats.listingNotAu} not AU, ${stats.notListing} not a listing, ${undetected} undetected`}
+          >
+            {stats.verified > 0 && <i className="v-ok" style={{ width: `${share(stats.verified)}%` }} />}
+            {stats.listingNotAu > 0 && <i className="v-notau" style={{ width: `${share(stats.listingNotAu)}%` }} />}
+            {stats.notListing > 0 && <i className="v-notlisting" style={{ width: `${share(stats.notListing)}%` }} />}
+            {undetected > 0 && <i className="v-undetected" style={{ width: `${share(undetected)}%` }} />}
+          </div>
+          <div className="legend" aria-hidden="true">
+            <span><i className="v-ok" />AU listings {stats.verified.toLocaleString("en-AU")}</span>
+            <span><i className="v-notau" />Not AU {stats.listingNotAu.toLocaleString("en-AU")}</span>
+            <span><i className="v-notlisting" />Not a listing {stats.notListing.toLocaleString("en-AU")}</span>
+            <span><i className="v-undetected" />Undetected {undetected.toLocaleString("en-AU")}</span>
+          </div>
         </div>
-        <div className="stat k-bad">
-          <b>{stats.listingNotAu.toLocaleString("en-AU")}</b>
-          <span>Not AU</span>
+
+        <div className="tile span-3">
+          <div className="label">AU listings</div>
+          <div className="value">
+            {stats.verified.toLocaleString("en-AU")}
+            <small>{today > 0 ? `+${today} today` : `${week} in the last 7 days`}</small>
+          </div>
+          <div
+            className="spark"
+            role="img"
+            aria-label={`${week} verified listings collected in the last 7 days`}
+          >
+            {days.map((d) => (
+              <i
+                key={d.day}
+                title={`${d.day}: ${d.count}`}
+                style={{ height: `${Math.max(6, (d.count / peak) * 100)}%` }}
+              />
+            ))}
+          </div>
         </div>
-        <div className="stat k-bad">
-          <b>{stats.notListing.toLocaleString("en-AU")}</b>
-          <span>Not a listing</span>
+
+        <div className="tile span-2">
+          <div className="label">Collected</div>
+          <div className="value">{stats.total.toLocaleString("en-AU")}</div>
+          <div className="sub">
+            {undetected === 0
+              ? "every post has a verdict"
+              : `${undetected.toLocaleString("en-AU")} awaiting a verdict`}
+          </div>
         </div>
-        <div className="stat k-warn">
-          <b>{undetected.toLocaleString("en-AU")}</b>
-          <span>Undetected</span>
-        </div>
-        <div className="stat k-ok">
-          <b>
-            {stats.detected > 0
-              ? `${Math.round((stats.verified / stats.detected) * 100)}%`
-              : "—"}
-          </b>
-          <span>Precision</span>
-        </div>
-        <div className="stat">
-          <b>{stats.total.toLocaleString("en-AU")}</b>
-          <span>Collected</span>
+
+        <div className="tile span-2">
+          <div className="label">Detector spend</div>
+          <div className="value">{money(spend)}</div>
+          <div className="sub">
+            {verdicts === 0
+              ? "no verdicts yet"
+              : `${verdicts.toLocaleString("en-AU")} verdicts · ${money(spend / verdicts)} each`}
+          </div>
         </div>
       </div>
 
       <form className="filters">
         <input type="hidden" name="layout" value={layout} />
         <div className="field grow">
-          <label htmlFor="q">Search</label>
+          <label htmlFor="q" className="sr">Search</label>
           <input
             id="q"
             type="text"
@@ -105,17 +169,17 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
           />
         </div>
         <div className="field fixed">
-          <label htmlFor="view">View</label>
-          <select id="view" name="view" defaultValue={view}>
+          <label htmlFor="view" className="sr">View</label>
+          <select id="view" name="view" defaultValue={view} data-on={view !== "verified"}>
             <option value="verified">Verified only</option>
             <option value="rejected">Rejected only</option>
             <option value="all">All detected</option>
           </select>
         </div>
         <div className="field fixed">
-          <label htmlFor="state">State</label>
-          <select id="state" name="state" defaultValue={filters.state}>
-            <option value="">Any</option>
+          <label htmlFor="state" className="sr">State</label>
+          <select id="state" name="state" defaultValue={filters.state} data-on={!!filters.state}>
+            <option value="">State · any</option>
             {states.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -124,9 +188,14 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
           </select>
         </div>
         <div className="field fixed">
-          <label htmlFor="listingType">Type</label>
-          <select id="listingType" name="listingType" defaultValue={filters.listingType}>
-            <option value="">Any</option>
+          <label htmlFor="listingType" className="sr">Type</label>
+          <select
+            id="listingType"
+            name="listingType"
+            defaultValue={filters.listingType}
+            data-on={!!filters.listingType}
+          >
+            <option value="">Type · any</option>
             {types.map((t) => (
               <option key={t} value={t}>
                 {LISTING_TYPE_LABELS[t] ?? t}
@@ -134,23 +203,25 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
             ))}
           </select>
         </div>
-        <div className="field fixed">
-          <label htmlFor="hasAddress">Address</label>
-          <select id="hasAddress" name="hasAddress" defaultValue={filters.hasAddress}>
-            <option value="">Any</option>
-            <option value="1">Full street address only</option>
-          </select>
-        </div>
-        <button className="primary" type="submit">
+        <label className="pill-check">
+          <input
+            type="checkbox"
+            name="hasAddress"
+            value="1"
+            defaultChecked={filters.hasAddress === "1"}
+          />
+          Street address only
+        </label>
+        <button className="primary small" type="submit">
           Apply
         </button>
         <div className="spacer" />
         <div className="segmented">
+          <Link href={layoutHref(filters, "cards")} data-on={layout === "cards"}>
+            Cards
+          </Link>
           <Link href={layoutHref(filters, "rows")} data-on={layout === "rows"}>
             Rows
-          </Link>
-          <Link href={layoutHref(filters, "grid")} data-on={layout === "grid"}>
-            Grid
           </Link>
         </div>
       </form>
@@ -166,10 +237,15 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
             "Try widening the filters, or switch the view to “All detected”."
           )}
         </div>
-      ) : layout === "grid" ? (
+      ) : layout === "cards" ? (
         <div className="feed">
           {results.map((post) => {
             const verified = post.isListing && post.isAustralia;
+            const place = placeLabel(post);
+            // The price is the headline when the post wrote one; the place
+            // stands in when it didn't. Nothing here is derived — a card with
+            // no price and no address says so rather than showing a guess.
+            const headline = post.priceText ?? place;
             return (
               <Link
                 key={post.id}
@@ -188,33 +264,39 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
                   <div className="no-thumb">no thumbnail cached</div>
                 )}
                 <div className="body">
+                  <div className={`headline${headline ? "" : " dim"}`} title={headline ?? undefined}>
+                    {headline ?? (verified ? "No price or address written" : `@${post.authorHandle ?? "unknown"}`)}
+                  </div>
+                  {verified ? (
+                    // The place goes under a price headline. A missing price
+                    // is the norm, not a finding, so it isn't announced; a
+                    // missing address under a price is worth a word.
+                    post.priceText && (
+                      <div className="sub" title={place ?? undefined}>
+                        {place ?? "No address written"}
+                      </div>
+                    )
+                  ) : (
+                    <div className="sub reason" title={post.reason ?? undefined}>
+                      {post.reason ?? "No reason recorded"}
+                    </div>
+                  )}
+                  <div className="caption">{post.text || <em>No caption</em>}</div>
                   <div className="verdict-line">
-                    {verified ? (
-                      <span className="tag ok">
-                        {LISTING_TYPE_LABELS[post.listingType ?? ""] ?? "Listing"}
-                      </span>
-                    ) : (
-                      <span className="tag bad">
-                        {post.isListing ? "Not AU" : "Not listing"}
-                      </span>
-                    )}
-                    {placeLabel(post) && (
-                      <span className="tag place" title={placeLabel(post)!}>
-                        {placeLabel(post)}
-                      </span>
-                    )}
+                    <VerdictTag post={post} />
                     {(post.propertyCount ?? 1) > 1 && (
-                      <span className="tag warn" title="This post advertises several properties; the address shown is the first.">
+                      <span
+                        className="tag warn"
+                        title="This post advertises several properties; the address shown is the first."
+                      >
                         +{post.propertyCount! - 1} more
                       </span>
                     )}
-                    <span className="tag mono conf">{post.confidence}%</span>
+                    <span className="conf" title={`${post.confidence}% confidence`}>
+                      <i style={{ "--w": `${post.confidence}%` } as React.CSSProperties} />
+                      {post.confidence}%
+                    </span>
                   </div>
-
-                  {post.priceText && <div className="price">{post.priceText}</div>}
-
-                  <div className="caption">{post.text || <em>No caption</em>}</div>
-
                   <div className="meta">
                     <span>@{post.authorHandle ?? "unknown"}</span>
                     <span>{relativeTime(post.postedAt)}</span>
@@ -261,15 +343,7 @@ export default async function FeedPage({ searchParams }: { searchParams: SearchP
                   {placeLabel(post) ?? "—"}
                 </span>
                 <span className="hide-sm">
-                  {verified ? (
-                    <span className="tag ok">
-                      {LISTING_TYPE_LABELS[post.listingType ?? ""] ?? "Listing"}
-                    </span>
-                  ) : (
-                    <span className="tag bad">
-                      {post.isListing ? "Not AU" : "Not listing"}
-                    </span>
-                  )}
+                  <VerdictTag post={post} />
                 </span>
                 <span className="price hide-sm">{post.priceText ?? "—"}</span>
                 <span className="num">{post.confidence}%</span>

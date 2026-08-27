@@ -157,3 +157,59 @@ export function distinctValues() {
 
   return { states, types };
 }
+
+/**
+ * Every dollar the detector has reported, across every verdict ever written.
+ *
+ * Detections are append-only, so re-detections count too — they cost money
+ * as surely as a first pass did, and "what has this experiment cost" is one
+ * of the five questions the prototype exists to answer.
+ */
+export function detectorSpend() {
+  const row = db
+    .select({
+      spend: sql<number>`COALESCE(SUM(${detections.costUsd}), 0)`,
+      verdicts: sql<number>`COUNT(*)`,
+    })
+    .from(detections)
+    .get();
+
+  return { spend: row?.spend ?? 0, verdicts: row?.verdicts ?? 0 };
+}
+
+/**
+ * Verified listings first collected on each of the last `days` days, oldest
+ * first, with quiet days filled in as zero.
+ *
+ * Keyed on `collectedAt` — when SOLD found the post, not when it was written —
+ * because "is the harvest producing" is the question a sparkline on the feed
+ * answers. Days are UTC, matching the stored timestamps.
+ */
+export function verifiedByDay(days = 7): { day: string; count: number }[] {
+  const dayOf = (offset: number) =>
+    new Date(Date.now() - offset * 86_400_000).toISOString().slice(0, 10);
+  const since = dayOf(days - 1);
+
+  const rows = db
+    .select({
+      day: sql<string>`substr(${posts.collectedAt}, 1, 10)`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(posts)
+    .innerJoin(detections, eq(posts.latestDetectionId, detections.id))
+    .where(
+      and(
+        eq(detections.isListing, true),
+        eq(detections.isAustralia, true),
+        sql`${posts.collectedAt} >= ${since}`,
+      ),
+    )
+    .groupBy(sql`substr(${posts.collectedAt}, 1, 10)`)
+    .all();
+
+  const byDay = new Map(rows.map((r) => [r.day, r.count]));
+  return Array.from({ length: days }, (_, i) => {
+    const day = dayOf(days - 1 - i);
+    return { day, count: byDay.get(day) ?? 0 };
+  });
+}

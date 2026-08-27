@@ -58,37 +58,35 @@ export function RedetectPanel({
 
   const body = (
     <form action={startRedetection} className="card">
-      <p className="small muted" style={{ margin: "0 0 14px" }}>
+      <p className="small muted" style={{ margin: "0 0 16px" }}>
         Re-runs posts already collected through the current prompt, appending a
         verdict rather than replacing one. Nothing is collected and nothing is
         overwritten.
       </p>
 
       <div style={{ maxWidth: 420 }}>
-        <div>
-          <label htmlFor="redetectDetector">Detector</label>
-          <select
-            id="redetectDetector"
-            name="detectorId"
-            value={detectorId}
-            onChange={(e) => change(() => setDetectorId(e.target.value))}
-          >
-            {detectors.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-          <div className="row" style={{ gap: 4, marginTop: 8 }}>
-            <span className="tag mono">prompt v{detector.promptVersion}</span>
-          </div>
+        <label htmlFor="redetectDetector">Detector</label>
+        <select
+          id="redetectDetector"
+          name="detectorId"
+          value={detectorId}
+          onChange={(e) => change(() => setDetectorId(e.target.value))}
+        >
+          {detectors.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+        <div className="chips" style={{ marginTop: 8 }}>
+          <span className="tag mono">prompt v{detector.promptVersion}</span>
         </div>
       </div>
 
-      <h2 style={{ marginTop: 22 }}>Scope</h2>
-      <div className="grid" style={{ gap: 8 }}>
+      <h2>Scope</h2>
+      <div className="options">
         {scopes.map((option) => (
-          <label key={option.id} className="plain">
+          <label key={option.id} className="option">
             <input
               type="radio"
               name="scope"
@@ -96,12 +94,13 @@ export function RedetectPanel({
               checked={scope === option.id}
               onChange={() => change(() => setScope(option.id))}
             />
+            <i className="box" aria-hidden="true" />
             <span>
               <b>{option.label}</b>
-              <span className="small muted" style={{ display: "block" }}>
+              <small>
                 {option.note} — {(detector.counts[option.id] ?? 0).toLocaleString("en-AU")}{" "}
                 post(s).
-              </span>
+              </small>
             </span>
           </label>
         ))}
@@ -116,29 +115,29 @@ export function RedetectPanel({
       )}
 
       {prepared ? (
-        <div className="verdict" style={{ marginTop: 18 }}>
-          <div className="row" style={{ gap: 4 }}>
+        <div className="confirm">
+          <div className="chips">
             <span className="tag">{count.toLocaleString("en-AU")} post(s)</span>
             <span className="tag mono">
               {estimate === null ? "cost unknown" : `≈ ${money(estimate)}`}
             </span>
           </div>
-          <p className="small">
+          <p>
             {estimate === null
               ? "No completed detections yet, so there is nothing to estimate a cost from. The post count is the number that scales."
               : "Estimated from the cost of past detections. The current prompt asks for more output than those runs did, so treat this as a floor."}
           </p>
-          <div className="row" style={{ gap: 8, marginTop: 10 }}>
+          <div className="row" style={{ marginTop: 12 }}>
             <button className="primary" type="submit" disabled={runActive || count === 0}>
               Start re-detection
             </button>
-            <button className="small" type="button" onClick={() => setPrepared(false)}>
+            <button className="ghost" type="button" onClick={() => setPrepared(false)}>
               Back
             </button>
           </div>
         </div>
       ) : (
-        <div className="row" style={{ gap: 8, marginTop: 18 }}>
+        <div className="row" style={{ marginTop: 20 }}>
           <button className="primary" type="button" onClick={() => setPrepared(true)}>
             Prepare re-detection
           </button>

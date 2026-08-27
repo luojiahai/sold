@@ -21,12 +21,14 @@ export default async function SessionsPage() {
   return (
     <>
       <div className="page-head">
-        <h1>Platform sessions</h1>
-        <p className="lede">
-          The cookie collector authenticates as a burner Instagram account. Session death
-          is the most common way a run fails, so test before you crawl rather than
-          discovering it twenty minutes in.
-        </p>
+        <div>
+          <h1>Platform sessions</h1>
+          <p className="lede">
+            The cookie collector authenticates as a burner Instagram account. Session death
+            is the most common way a run fails, so test before you crawl rather than
+            discovering it twenty minutes in.
+          </p>
+        </div>
       </div>
 
       {!hasActive && (

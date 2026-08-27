@@ -50,7 +50,7 @@ export function AddSessionForm() {
             rows={5}
             placeholder="sessionid=…; csrftoken=…; ds_user_id=…; mid=…; ig_did=…"
           />
-          <p className="small muted" style={{ margin: "6px 0 0" }}>
+          <p className="help">
             Paste a raw <code>Cookie:</code> header, a cookies.txt export, or just the{" "}
             <code>sessionid</code> value. In a logged-in Instagram tab: DevTools →
             Application → Cookies → instagram.com. The whole header beats{" "}
