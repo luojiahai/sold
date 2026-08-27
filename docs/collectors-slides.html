@@ -1,0 +1,462 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collector Options Deck</title>
+
+<style>
+  :root {
+    --bg:     #ffffff;
+    --text:   #1a1a1a;
+    --muted:  #666666;
+    --line:   #dddddd;
+    --accent: #1a56db;
+    --good:   #1e8e5a;
+    --mid:    #c77d00;
+    --bad:    #c8321f;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; line-height: 1.4; }
+
+  .deck {
+    position: absolute; inset: 0; margin: auto;
+    width: 100vw; height: 100vh;
+    max-width: calc(100vh * 16 / 9);
+    max-height: calc(100vw * 9 / 16);
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    padding: clamp(24px, 6vw, 72px) clamp(24px, 7vw, 88px);
+    display: flex; flex-direction: column; justify-content: center;
+    opacity: 0; visibility: hidden; transition: opacity 0.25s;
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+
+  .label {
+    position: absolute; top: clamp(18px, 4vw, 40px); left: clamp(24px, 7vw, 88px);
+    font-size: clamp(14px, 1.5vw, 18px); color: var(--muted);
+  }
+  .num {
+    position: absolute; bottom: clamp(18px, 4vw, 40px); right: clamp(24px, 7vw, 88px);
+    font-size: clamp(14px, 1.5vw, 18px); color: var(--muted);
+  }
+
+  h1 { font-size: clamp(35px, 6.25vw, 80px); font-weight: 700; line-height: 1.1; max-width: 18ch; }
+  h2 { font-size: clamp(28px, 4.25vw, 55px); font-weight: 700; line-height: 1.15; max-width: 24ch; margin-bottom: clamp(16px, 2.6vw, 32px); }
+  p  { font-size: clamp(19px, 2.38vw, 30px); color: var(--muted); max-width: 40ch; }
+  .accent { color: var(--accent); }
+  /* cover */
+  .cover-name { font-size: clamp(88px, 15vw, 190px); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; color: var(--text); }
+  .cover-full { font-size: clamp(13px, 1.5vw, 19px); font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-top: clamp(8px, 1.2vw, 16px); }
+  .cover-rule { border: 0; border-top: 2px solid var(--text); width: clamp(48px, 6vw, 80px); margin: clamp(22px, 3.4vw, 44px) 0; }
+  .cover-sub { font-size: clamp(24px, 3.4vw, 44px); font-weight: 600; line-height: 1.15; max-width: 22ch; margin-bottom: clamp(10px, 1.6vw, 20px); }
+  .cover-tag { font-size: clamp(17px, 2vw, 26px); color: var(--muted); max-width: 44ch; }
+  .cover-meta { position: absolute; bottom: clamp(18px, 4vw, 40px); left: clamp(24px, 7vw, 88px); font-size: clamp(13px, 1.4vw, 17px); color: var(--muted); }
+
+  /* pipeline */
+  .flow { display: flex; align-items: center; gap: clamp(6px, 1vw, 14px); }
+  .flow .node { flex: 1; border: 1px solid var(--line); border-radius: 6px; padding: clamp(10px, 1.6vw, 20px) clamp(8px, 1.2vw, 14px); min-width: 0; }
+  .flow .node b { display: block; font-size: clamp(15px, 1.88vw, 24px); }
+  .flow .node span { font-size: clamp(12px, 1.44vw, 19px); color: var(--muted); }
+  .flow .node.hot { border-color: var(--accent); border-width: 2px; }
+  .flow .node.hot b { color: var(--accent); }
+  .flow .arrow { color: var(--muted); font-size: clamp(18px, 2.5vw, 30px); }
+
+  /* option top: text left, diagram right */
+  .opt-top { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(16px, 3vw, 40px); align-items: center; }
+  .opt-top h2 { margin-bottom: clamp(10px, 1.6vw, 20px); }
+  .opt-top svg { display: block; width: 100%; height: auto; color: var(--text); }
+  @media (max-width: 640px) { .opt-top { grid-template-columns: 1fr; } }
+
+  /* option facts */
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 3vw, 40px); margin-top: clamp(16px, 2.4vw, 32px); }
+  .fact { border-top: 1px solid var(--line); padding-top: clamp(10px, 1.4vw, 18px); }
+  .fact .k { font-size: clamp(14px, 1.5vw, 18px); color: var(--muted); margin-bottom: 0.3em; }
+  .fact .v { font-size: clamp(20px, 2.75vw, 35px); font-weight: 600; line-height: 1.2; }
+  .fact .s { font-size: clamp(15px, 1.69vw, 20px); color: var(--muted); margin-top: 0.3em; }
+  .fact.good .v { color: var(--good); }
+  .fact.mid  .v { color: var(--mid); }
+  .fact.bad  .v { color: var(--bad); }
+
+  /* chart */
+  .chart svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; gap: clamp(14px, 2.4vw, 32px); margin-top: clamp(8px, 1.4vw, 18px); font-size: clamp(15px, 1.62vw, 20px); color: var(--muted); }
+  .legend i { display: inline-block; width: 0.8em; height: 0.8em; vertical-align: -0.05em; margin-right: 0.4em; }
+
+  /* scorecard */
+  .score { width: 100%; border-collapse: collapse; font-size: clamp(14px, 1.7vw, 21px); }
+  .score th { text-align: left; font-weight: 600; padding: 0 0 clamp(6px, 1vw, 12px); border-bottom: 2px solid var(--text); }
+  .score td { padding: clamp(4px, 0.7vw, 8px) 0; border-bottom: 1px solid var(--line); }
+  .score td:first-child { font-weight: 600; width: 22%; }
+  .score td:not(:first-child) { color: var(--muted); }
+  .dot { display: inline-block; width: 0.65em; height: 0.65em; border-radius: 50%; margin-right: 0.5em; }
+  .dot.good { background: var(--good); }
+  .dot.mid  { background: var(--mid); }
+  .dot.bad  { background: var(--bad); }
+
+  /* phases */
+  .phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 3vw, 40px); }
+  .phase { border-top: 1px solid var(--line); padding-top: clamp(10px, 1.4vw, 18px); }
+  .phase.now { border-top: 3px solid var(--accent); }
+  .phase .k { font-size: clamp(14px, 1.5vw, 18px); color: var(--muted); margin-bottom: 0.3em; }
+  .phase .v { font-size: clamp(20px, 2.75vw, 35px); font-weight: 600; line-height: 1.2; }
+  .phase.now .v { color: var(--accent); }
+  .phase .s { font-size: clamp(15px, 1.69vw, 21px); color: var(--muted); margin-top: 0.4em; }
+
+  .note { font-size: clamp(14px, 1.44vw, 18px); color: var(--muted); margin-top: clamp(14px, 2.2vw, 28px); max-width: 100ch; line-height: 1.45; }
+  .note b { color: var(--text); font-weight: 600; }
+
+  /* nav */
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); width: 0; transition: width 0.25s; z-index: 10; }
+  .nav { position: fixed; bottom: clamp(12px, 2.4vw, 28px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+  .nav button { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; width: 36px; height: 36px; font-size: 16px; cursor: pointer; font-family: var(--font); }
+  .nav button:hover { border-color: var(--text); }
+  .nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (max-width: 640px) {
+    .facts, .phases { grid-template-columns: 1fr; }
+    .score td:first-child { width: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { .slide, .progress { transition: none; } }
+</style>
+
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide active cover">
+    <div class="cover-name">SOLD</div>
+    <div class="cover-full">Social-Origin Listing Discovery</div>
+    <hr class="cover-rule">
+    <h2 class="cover-sub">How we get Australian property listing posts off Instagram</h2>
+    <p class="cover-tag">Three ways to collect those posts. One decision to make.</p>
+    <div class="cover-meta">Collector options &middot; 27 Aug 2026</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="label">The pipeline</div>
+    <h2>Five steps. One touches Instagram.</h2>
+    <div class="flow">
+      <div class="node"><b>Seed terms</b><span>29 hashtags &amp; keywords</span></div>
+      <div class="arrow">&rarr;</div>
+      <div class="node hot"><b>Collector</b><span>fetches posts from Instagram</span></div>
+      <div class="arrow">&rarr;</div>
+      <div class="node"><b>Posts</b><span>caption, author, date</span></div>
+      <div class="arrow">&rarr;</div>
+      <div class="node"><b>Detector</b><span>Claude reads each one</span></div>
+      <div class="arrow">&rarr;</div>
+      <div class="node"><b>Verified listing</b><span>real, and in Australia</span></div>
+    </div>
+    <p style="margin-top:clamp(18px,3vw,40px)">The collector is swappable. Everything after it stays the same.</p>
+    <div class="num"></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="label">Option 1</div>
+    <div class="opt-top">
+      <div>
+        <h2>Burner account pool</h2>
+        <p>We own ~10 throwaway accounts. One gets blocked, the next takes over.</p>
+      </div>
+      <figure>
+        <svg viewBox="0 0 560 220" role="img" aria-label="Option 1: the SOLD collector picks a live account from a pool of our own accounts, each behind its own residential proxy, and calls Instagram's web API directly. A blocked account is marked dead and the next one is used.">
+          <defs>
+            <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+            <marker id="a1-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1a56db"/></marker>
+          </defs>
+          <g font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="currentColor" stroke-width="1.5">
+            <rect x="10" y="85" width="104" height="50" rx="5" fill="none" stroke="currentColor"/>
+            <text x="62" y="106" text-anchor="middle" font-weight="600">SOLD</text>
+            <text x="62" y="122" text-anchor="middle" font-size="11" opacity="0.7">collector</text>
+
+            <rect x="170" y="14" width="200" height="192" rx="6" fill="none" stroke="#1a56db" stroke-dasharray="5 4"/>
+            <text x="270" y="34" text-anchor="middle" font-weight="600" fill="#1a56db">Our account pool</text>
+
+            <rect x="184" y="48" width="172" height="36" rx="4" fill="none" stroke="currentColor"/>
+            <text x="270" y="66" text-anchor="middle" font-size="12">account 1 &middot; own proxy IP</text>
+            <text x="270" y="78" text-anchor="middle" font-size="10" opacity="0.7">live</text>
+
+            <rect x="184" y="96" width="172" height="36" rx="4" fill="none" stroke="#c8321f"/>
+            <text x="270" y="114" text-anchor="middle" font-size="12" fill="#c8321f">account 2 &middot; own proxy IP</text>
+            <text x="270" y="126" text-anchor="middle" font-size="10" fill="#c8321f">blocked &rarr; marked dead</text>
+
+            <rect x="184" y="144" width="172" height="36" rx="4" fill="none" stroke="currentColor"/>
+            <text x="270" y="162" text-anchor="middle" font-size="12">account 3 &middot; own proxy IP</text>
+            <text x="270" y="174" text-anchor="middle" font-size="10" opacity="0.7">next in line</text>
+
+            <line x1="114" y1="110" x2="168" y2="110" stroke="#1a56db" marker-end="url(#a1-b)"/>
+            <text x="141" y="100" text-anchor="middle" font-size="10" fill="#1a56db">pick a live one</text>
+
+            <rect x="440" y="85" width="110" height="50" rx="5" fill="none" stroke="currentColor"/>
+            <text x="495" y="106" text-anchor="middle" font-weight="600">Instagram</text>
+            <text x="495" y="122" text-anchor="middle" font-size="11" opacity="0.7">web API</text>
+
+            <line x1="356" y1="66" x2="438" y2="100" stroke="currentColor" marker-end="url(#a1)"/>
+            <text x="404" y="70" text-anchor="middle" font-size="10" opacity="0.8">fetch posts</text>
+            <line x1="356" y1="114" x2="400" y2="114" stroke="#c8321f" stroke-dasharray="3 3"/>
+            <text x="404" y="118" font-size="10" fill="#c8321f">429 / login</text>
+          </g>
+        </svg>
+      </figure>
+    </div>
+    <div class="facts">
+      <div class="fact good"><div class="k">Cost</div><div class="v">$10&ndash;40 / month</div><div class="s">accounts + proxies</div></div>
+      <div class="fact mid"><div class="k">Build</div><div class="v">1&ndash;2 weeks</div><div class="s">on top of what exists</div></div>
+      <div class="fact bad"><div class="k">Risk</div><div class="v">Breaks Instagram&rsquo;s terms</div><div class="s">Meta has sued scrapers</div></div>
+    </div>
+    <p class="note"><b>Cost.</b> Accounts are free to create, or $0.40&ndash;3 each to buy pre-aged. Aged accounts survive longer; fresh ones get challenged within hours. Expect ~25% to die each month. Proxies: about 1 GB/month at $4&ndash;8/GB, one residential IP per account.</p>
+    <div class="num"></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="label">Option 2</div>
+    <div class="opt-top">
+      <div>
+        <h2>Vendor API</h2>
+        <p>A scraping company fetches the posts. We pay per post.</p>
+      </div>
+      <figure>
+        <svg viewBox="0 0 560 220" role="img" aria-label="Option 2: the SOLD collector sends a hashtag request over HTTPS to a vendor, which runs its own accounts, proxies and retry logic against Instagram and returns posts as JSON. Everything risky sits inside the vendor's box.">
+          <defs>
+            <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+            <marker id="a2-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1a56db"/></marker>
+          </defs>
+          <g font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="currentColor" stroke-width="1.5">
+            <rect x="10" y="85" width="104" height="50" rx="5" fill="none" stroke="currentColor"/>
+            <text x="62" y="106" text-anchor="middle" font-weight="600">SOLD</text>
+            <text x="62" y="122" text-anchor="middle" font-size="11" opacity="0.7">collector</text>
+
+            <rect x="180" y="14" width="200" height="192" rx="6" fill="none" stroke="#1a56db"/>
+            <text x="280" y="34" text-anchor="middle" font-weight="600" fill="#1a56db">Vendor</text>
+            <text x="280" y="49" text-anchor="middle" font-size="10" fill="#1a56db">Bright Data &middot; Apify &middot; HikerAPI</text>
+
+            <rect x="196" y="62" width="168" height="30" rx="4" fill="none" stroke="currentColor" opacity="0.8"/>
+            <text x="280" y="81" text-anchor="middle" font-size="12">their accounts</text>
+            <rect x="196" y="100" width="168" height="30" rx="4" fill="none" stroke="currentColor" opacity="0.8"/>
+            <text x="280" y="119" text-anchor="middle" font-size="12">their proxies</text>
+            <rect x="196" y="138" width="168" height="30" rx="4" fill="none" stroke="currentColor" opacity="0.8"/>
+            <text x="280" y="157" text-anchor="middle" font-size="12">their retries &amp; bans</text>
+            <text x="280" y="192" text-anchor="middle" font-size="10" fill="#1a56db">risk and upkeep live here</text>
+
+            <line x1="114" y1="100" x2="178" y2="100" stroke="#1a56db" marker-end="url(#a2-b)"/>
+            <text x="146" y="92" text-anchor="middle" font-size="10" fill="#1a56db">hashtag (HTTPS)</text>
+            <line x1="178" y1="122" x2="116" y2="122" stroke="#1a56db" marker-end="url(#a2-b)"/>
+            <text x="146" y="138" text-anchor="middle" font-size="10" fill="#1a56db">posts as JSON</text>
+
+            <rect x="440" y="85" width="110" height="50" rx="5" fill="none" stroke="currentColor"/>
+            <text x="495" y="106" text-anchor="middle" font-weight="600">Instagram</text>
+            <text x="495" y="122" text-anchor="middle" font-size="11" opacity="0.7">web API</text>
+
+            <line x1="380" y1="110" x2="438" y2="110" stroke="currentColor" marker-end="url(#a2)"/>
+            <text x="409" y="100" text-anchor="middle" font-size="10" opacity="0.8">scrapes</text>
+          </g>
+        </svg>
+      </figure>
+    </div>
+    <div class="facts">
+      <div class="fact good"><div class="k">Cost</div><div class="v">$75&ndash;115 / month</div><div class="s">Bright Data or Apify; HikerAPI under $50</div></div>
+      <div class="fact good"><div class="k">Build</div><div class="v">2&ndash;4 days</div><div class="s">the slot already exists</div></div>
+      <div class="fact good"><div class="k">Risk</div><div class="v">Vendor carries it</div><div class="s">no accounts on our side</div></div>
+    </div>
+    <p class="note"><b>Cost.</b> Bright Data $1.50 and Apify $2.30 per 1,000 posts, pay as you go. HikerAPI ~$0.001 per request after a $100 deposit. Prices checked 27 Aug 2026. <b>Coverage</b> depends on the vendor; &ldquo;newest first&rdquo; hashtag results need checking before we commit.</p>
+    <div class="num"></div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="label">Option 3</div>
+    <div class="opt-top">
+      <div>
+        <h2>Claude drives a browser</h2>
+        <p>An AI agent opens Instagram and reads each post, like a person would.</p>
+      </div>
+      <figure>
+        <svg viewBox="0 0 560 220" role="img" aria-label="Option 3: SOLD hands a search term to Claude, which drives a headless browser in a loop, reading each page and deciding what to click. The browser is logged into Instagram's website with one of our accounts, so the account and proxy needs of option 1 still apply, and every loop step is a paid model call.">
+          <defs>
+            <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+            <marker id="a3-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1a56db"/></marker>
+          </defs>
+          <g font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="currentColor" stroke-width="1.5">
+            <rect x="10" y="85" width="104" height="50" rx="5" fill="none" stroke="currentColor"/>
+            <text x="62" y="106" text-anchor="middle" font-weight="600">SOLD</text>
+            <text x="62" y="122" text-anchor="middle" font-size="11" opacity="0.7">collector</text>
+
+            <rect x="184" y="20" width="150" height="50" rx="5" fill="none" stroke="#1a56db"/>
+            <text x="259" y="41" text-anchor="middle" font-weight="600" fill="#1a56db">Claude</text>
+            <text x="259" y="57" text-anchor="middle" font-size="11" fill="#1a56db">reads page, decides click</text>
+
+            <rect x="184" y="150" width="150" height="50" rx="5" fill="none" stroke="currentColor"/>
+            <text x="259" y="171" text-anchor="middle" font-weight="600">Headless browser</text>
+            <text x="259" y="187" text-anchor="middle" font-size="11" opacity="0.7">logged in as our account</text>
+
+            <line x1="240" y1="70" x2="240" y2="148" stroke="#1a56db" marker-end="url(#a3-b)"/>
+            <text x="232" y="112" text-anchor="end" font-size="10" fill="#1a56db">click / scroll / open post</text>
+            <line x1="278" y1="148" x2="278" y2="72" stroke="#1a56db" marker-end="url(#a3-b)"/>
+            <text x="286" y="112" font-size="10" fill="#1a56db">page text</text>
+            <text x="286" y="124" font-size="10" fill="#1a56db" font-weight="600">$ per loop, ~2 per post</text>
+
+            <line x1="114" y1="100" x2="182" y2="52" stroke="currentColor" marker-end="url(#a3)"/>
+            <text x="138" y="66" text-anchor="middle" font-size="10" opacity="0.8">term</text>
+            <line x1="182" y1="60" x2="116" y2="118" stroke="currentColor" stroke-dasharray="3 3" marker-end="url(#a3)"/>
+            <text x="160" y="120" text-anchor="middle" font-size="10" opacity="0.8">posts</text>
+
+            <rect x="440" y="150" width="110" height="50" rx="5" fill="none" stroke="currentColor"/>
+            <text x="495" y="171" text-anchor="middle" font-weight="600">Instagram</text>
+            <text x="495" y="187" text-anchor="middle" font-size="11" opacity="0.7">website</text>
+            <line x1="334" y1="175" x2="438" y2="175" stroke="currentColor" marker-end="url(#a3)"/>
+            <text x="386" y="167" text-anchor="middle" font-size="10" opacity="0.8">one page per post</text>
+
+            <rect x="440" y="20" width="110" height="50" rx="5" fill="none" stroke="#c8321f" stroke-dasharray="5 4"/>
+            <text x="495" y="41" text-anchor="middle" font-size="11" fill="#c8321f">our account + proxy</text>
+            <text x="495" y="57" text-anchor="middle" font-size="10" fill="#c8321f">same risk as option 1</text>
+            <line x1="495" y1="70" x2="495" y2="148" stroke="#c8321f" stroke-dasharray="3 3"/>
+          </g>
+        </svg>
+      </figure>
+    </div>
+    <div class="facts">
+      <div class="fact bad"><div class="k">Cost</div><div class="v">~$3,000 / month</div><div class="s">about 6&cent; a post</div></div>
+      <div class="fact mid"><div class="k">Build</div><div class="v">1&ndash;2 weeks</div><div class="s">plus constant tuning</div></div>
+      <div class="fact bad"><div class="k">Risk</div><div class="v">Same as option 1</div><div class="s">still needs a logged-in account</div></div>
+    </div>
+    <p class="note"><b>Cost.</b> Instagram&rsquo;s hashtag grid shows only thumbnails, so the agent must open every post: about 2 model calls of ~10k tokens each on Sonnet 5 &asymp; 6&cent;. Haiku 4.5 halves it; screenshot-based control costs 3&ndash;5&times; more. It still logs in with one of our accounts, so the ban risk is the same as option 1.</p>
+    <div class="num"></div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="label">Monthly bill at 50,000 posts</div>
+    <h2>Detection costs the same. Collection doesn&rsquo;t.</h2>
+    <div class="chart">
+      <svg viewBox="0 0 900 230" role="img" aria-label="Bar chart of monthly cost: burner pool about 540 dollars, vendor API about 600 dollars, Claude browser about 3,520 dollars. Each bar includes a fixed 520 dollar detection segment.">
+        <g font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="22" fill="#1a1a1a">
+          <text x="0" y="47">Burner pool</text>
+          <rect x="190" y="26" width="99" height="30" fill="#bbbbbb"/>
+          <rect x="289" y="26" width="6" height="30" fill="#1a56db"/>
+          <text x="308" y="47" font-weight="600">$540</text>
+
+          <text x="0" y="122">Vendor API</text>
+          <rect x="190" y="101" width="99" height="30" fill="#bbbbbb"/>
+          <rect x="289" y="101" width="18" height="30" fill="#1a56db"/>
+          <text x="320" y="122" font-weight="600">$600</text>
+
+          <text x="0" y="197">Claude browser</text>
+          <rect x="190" y="176" width="99" height="30" fill="#bbbbbb"/>
+          <rect x="289" y="176" width="570" height="30" fill="#1a56db"/>
+          <text x="872" y="197" font-weight="600" text-anchor="end">$3,520</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i style="background:#bbbbbb"></i>Detection &middot; $520, every option</span>
+      <span><i style="background:#1a56db"></i>Collection</span>
+    </div>
+    <p class="note"><b>Volume.</b> 29 terms &times; 60 posts &times; one sweep a day &asymp; 50,000 posts/month; double every bar for two sweeps. <b>Detection</b> is $0.0104 per post, measured from our own runs on Sonnet 5, and is the biggest line for options 1 and 2.</p>
+    <div class="num"></div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="label">Side by side</div>
+    <h2>Scorecard</h2>
+    <table class="score">
+      <thead>
+        <tr><th></th><th>1 &middot; Burner pool</th><th>2 &middot; Vendor API</th><th>3 &middot; Claude browser</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cost</td><td><i class="dot good"></i>tens of $</td><td><i class="dot good"></i>~$100</td><td><i class="dot bad"></i>~$3,000</td></tr>
+        <tr><td>Time to build</td><td><i class="dot mid"></i>weeks</td><td><i class="dot good"></i>days</td><td><i class="dot mid"></i>weeks</td></tr>
+        <tr><td>Reliability</td><td><i class="dot mid"></i>bans</td><td><i class="dot good"></i>vendor&rsquo;s job</td><td><i class="dot mid"></i>slow, bans</td></tr>
+        <tr><td>Coverage</td><td><i class="dot good"></i>full</td><td><i class="dot mid"></i>depends on vendor</td><td><i class="dot good"></i>full</td></tr>
+        <tr><td>Freshness</td><td><i class="dot good"></i>minutes</td><td><i class="dot mid"></i>hours</td><td><i class="dot mid"></i>slow</td></tr>
+        <tr><td>Legal</td><td><i class="dot bad"></i>breach</td><td><i class="dot good"></i>transferred</td><td><i class="dot bad"></i>breach</td></tr>
+        <tr><td>Upkeep</td><td><i class="dot mid"></i>ongoing</td><td><i class="dot good"></i>low</td><td><i class="dot mid"></i>ongoing</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><b>Coverage</b> = can it see everything a logged-in user sees, newest first. <b>Freshness</b> = how soon after posting we have it. <b>Legal</b> = who carries the Terms-of-Use exposure. <b>Upkeep</b> = work to keep it running when Instagram changes something.</p>
+    <div class="num"></div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="label">Recommendation</div>
+    <h2>Burner pool now. Vendor API for production.</h2>
+    <div class="phases">
+      <div class="phase now">
+        <div class="k">Phase 1 &middot; now</div>
+        <div class="v">Harden the pool</div>
+        <div class="s">Rotation, proxies, fallback. Finish one full sweep. Spend ~nothing while we prove supply.</div>
+      </div>
+      <div class="phase">
+        <div class="k">Phase 2 &middot; if supply is real</div>
+        <div class="v">Switch to a vendor</div>
+        <div class="s">Days of work. Retire the burner accounts. Risk goes away.</div>
+      </div>
+      <div class="phase">
+        <div class="k">Option 3</div>
+        <div class="v">On the shelf</div>
+        <div class="s">Only if Instagram breaks the web endpoints and no vendor covers us.</div>
+      </div>
+    </div>
+    <p class="note">Switching collectors is a config change; the rest of the pipeline is untouched. Phase 1 is about two weeks of engineering and tens of dollars a month. Full analysis and sources: docs/collectors.html.</p>
+    <div class="num"></div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button type="button" id="prev" aria-label="Previous slide">&larr;</button>
+  <button type="button" id="next" aria-label="Next slide">&rarr;</button>
+</div>
+
+<script>
+  (function () {
+    var slides = document.querySelectorAll('.slide');
+    var total = slides.length;
+    var current = 1;
+    var progress = document.getElementById('progress');
+    for (var k = 0; k < total; k++) { var el = slides[k].querySelector('.num'); if (el) el.textContent = (k + 1) + ' / ' + total; }
+
+    function show(n) {
+      if (n < 1) n = 1;
+      if (n > total) n = total;
+      current = n;
+      for (var i = 0; i < total; i++) slides[i].classList.toggle('active', i === n - 1);
+      progress.style.width = (n / total * 100) + '%';
+      try { history.replaceState(null, '', '#' + n); } catch (e) {}
+    }
+    function next() { show(current + 1); }
+    function prev() { show(current - 1); }
+
+    document.getElementById('next').addEventListener('click', next);
+    document.getElementById('prev').addEventListener('click', prev);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+      if (e.key === 'Home') show(1);
+      if (e.key === 'End') show(total);
+    });
+    document.getElementById('deck').addEventListener('click', function (e) {
+      var r = e.currentTarget.getBoundingClientRect();
+      (e.clientX - r.left) < r.width / 4 ? prev() : next();
+    });
+
+    var x0 = null;
+    document.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+    });
+
+    var h = parseInt((location.hash || '').slice(1), 10);
+    show(h >= 1 && h <= total ? h : 1);
+  })();
+</script>

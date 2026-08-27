@@ -1,0 +1,696 @@
+<meta charset="utf-8">
+<title>SOLD Collector Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+  :root {
+    --paper:      #f1f4f5;
+    --surface:    #ffffff;
+    --surface-2:  #e7ecee;
+    --rule:       #d2dade;
+    --ink:        #12151a;
+    --slate:      #5a656e;
+    --sold:       #c81c3b;
+    --sold-wash:  #fbe9ec;
+    --signal:     #0d6d5f;
+    --signal-wash:#e2f0ed;
+    --warn:       #96650f;
+    --warn-wash:  #f6eddc;
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --measure: 36rem;
+    --wide: 54rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #101318;
+      --surface:    #181c22;
+      --surface-2:  #212730;
+      --rule:       #2e353f;
+      --ink:        #e7ebee;
+      --slate:      #98a3ad;
+      --sold:       #ff5a76;
+      --sold-wash:  #2b171c;
+      --signal:     #4cc4ac;
+      --signal-wash:#14261f;
+      --warn:       #e3a84c;
+      --warn-wash:  #2a2114;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #101318;
+    --surface:    #181c22;
+    --surface-2:  #212730;
+    --rule:       #2e353f;
+    --ink:        #e7ebee;
+    --slate:      #98a3ad;
+    --sold:       #ff5a76;
+    --sold-wash:  #2b171c;
+    --signal:     #4cc4ac;
+    --signal-wash:#14261f;
+    --warn:       #e3a84c;
+    --warn-wash:  #2a2114;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: var(--wide); margin: 0 auto; padding: 0 1.5rem 5rem; }
+  .col { max-width: var(--measure); }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    padding: 4rem 0 2.2rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  .wordmark { display: flex; align-items: baseline; gap: 0.85rem; flex-wrap: wrap; }
+  .wordmark h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2.6rem, 8vw, 4.2rem);
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+    margin: 0;
+  }
+  .sticker {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--surface);
+    background: var(--sold);
+    padding: 0.3rem 0.6rem;
+    transform: rotate(-6deg);
+    align-self: center;
+    white-space: nowrap;
+  }
+  .expansion {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    letter-spacing: -0.02em;
+    color: var(--slate);
+    margin-top: 0.4rem;
+  }
+  .thesis {
+    font-size: clamp(1.1rem, 2.4vw, 1.3rem);
+    line-height: 1.45;
+    max-width: 32rem;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem;
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--slate);
+  }
+  .meta b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- sections ---------- */
+
+  section { padding-top: 3.2rem; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--sold);
+    margin: 0 0 0.6rem;
+  }
+  h2 {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(1.5rem, 4vw, 2rem); letter-spacing: -0.03em; line-height: 1.1;
+    margin: 0 0 0.9rem; text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--display); font-weight: 600; font-size: 1.05rem;
+    letter-spacing: -0.015em; margin: 0 0 0.5rem;
+  }
+  p { margin: 0 0 1rem; }
+  .col > p:last-child { margin-bottom: 0; }
+  a { color: var(--sold); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--sold); outline-offset: 3px; }
+  strong { font-weight: 600; }
+  code { font-family: var(--mono); font-size: 0.83em; background: var(--surface-2); padding: 0.1em 0.35em; border-radius: 3px; }
+  ul { margin: 0 0 1rem; padding-left: 1.1rem; }
+  li { margin-bottom: 0.35rem; }
+  li::marker { color: var(--sold); }
+
+  /* ---------- figures ---------- */
+
+  figure { margin: 1.8rem 0; max-width: var(--wide); }
+  figure svg { display: block; width: 100%; height: auto; color: var(--ink); }
+  figcaption { font-family: var(--mono); font-size: 0.75rem; line-height: 1.55; color: var(--slate); margin-top: 0.8rem; max-width: 40rem; }
+  .figure-frame { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 1.4rem 1.2rem; overflow-x: auto; }
+  figure svg .f-sold { fill: var(--sold); }
+  figure svg .s-sold { stroke: var(--sold); }
+  figure svg .f-slate { fill: var(--slate); }
+  figure svg .wash { fill: var(--sold); opacity: 0.08; }
+
+  /* ---------- option cards ---------- */
+
+  .options { display: grid; gap: 1.2rem; margin: 1.6rem 0 0; }
+  .option {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 4px;
+    padding: 1.3rem 1.4rem 1.2rem;
+    display: grid; grid-template-columns: 1fr; gap: 0.7rem;
+  }
+  .option header { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; }
+  .option .num { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; color: var(--sold); letter-spacing: 0.1em; }
+  .option h3 { margin: 0; font-size: 1.15rem; }
+  .option .oneline { margin: 0; color: var(--slate); font-style: italic; }
+  .option .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.9rem 1.6rem; margin-top: 0.3rem; }
+  .option .cell h4 {
+    font-family: var(--mono); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--slate); margin: 0 0 0.35rem;
+  }
+  .option .cell ul { margin: 0; padding-left: 1rem; font-size: 0.95rem; }
+  .option .cell li { margin-bottom: 0.25rem; }
+  .option .cell p { margin: 0; font-size: 0.95rem; }
+
+  /* ---------- tables ---------- */
+
+  .table-wrap { overflow-x: auto; margin: 1.4rem 0; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-family: var(--mono); font-size: 0.79rem; line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    text-align: left; font-weight: 600; font-size: 0.66rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--slate);
+    padding: 0 0.9rem 0.55rem 0; border-bottom: 1.5px solid var(--ink); white-space: nowrap;
+  }
+  td { padding: 0.6rem 0.9rem 0.6rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td:last-child, th:last-child { padding-right: 0; }
+  td.lbl { font-weight: 600; white-space: nowrap; }
+  td.num { text-align: right; white-space: nowrap; }
+  th.num { text-align: right; }
+  tr.total td { border-bottom: 1.5px solid var(--ink); font-weight: 600; }
+  .sub { display: block; font-weight: 400; color: var(--slate); font-size: 0.72rem; }
+
+  .pill {
+    display: inline-block; font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase; padding: 0.15rem 0.45rem;
+    border-radius: 3px; white-space: nowrap;
+  }
+  .pill.good { background: var(--signal-wash); color: var(--signal); }
+  .pill.mid  { background: var(--warn-wash);   color: var(--warn); }
+  .pill.bad  { background: var(--sold-wash);   color: var(--sold); }
+  .pill.stub { background: var(--surface-2);   color: var(--slate); }
+
+  /* ---------- callout ---------- */
+
+  .callout {
+    background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--sold);
+    border-radius: 3px; padding: 1.2rem 1.4rem; margin: 1.6rem 0;
+  }
+  .callout.signal { border-top-color: var(--signal); }
+  .callout.signal .eyebrow { color: var(--signal); }
+  .callout .eyebrow { margin-bottom: 0.4rem; }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+
+  /* ---------- recommendation phases ---------- */
+
+  .phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+  .phase { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 1.1rem 1.2rem; }
+  .phase .eyebrow { margin-bottom: 0.3rem; }
+  .phase h3 { margin: 0 0 0.5rem; }
+  .phase p { font-size: 0.95rem; margin: 0 0 0.5rem; }
+  .phase p:last-child { margin: 0; }
+  .phase .trigger { font-family: var(--mono); font-size: 0.72rem; color: var(--slate); }
+
+  footer {
+    margin-top: 3.5rem; padding-top: 1.2rem; border-top: 2px solid var(--ink);
+    font-family: var(--mono); font-size: 0.72rem; line-height: 1.7; color: var(--slate);
+  }
+  footer .eyebrow { margin-bottom: 0.4rem; }
+  footer ul { padding-left: 1rem; margin: 0; }
+  footer li { margin-bottom: 0.15rem; }
+
+  @media print {
+    body { background: #fff; font-size: 12.5px; }
+    .page { padding: 0; }
+    section { padding-top: 1.6rem; break-inside: avoid; }
+    .option, .phase, .callout, figure { break-inside: avoid; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div>
+      <div class="wordmark">
+        <h1>Collector options</h1>
+        <span class="sticker">Decision</span>
+      </div>
+      <div class="expansion">How SOLD gets posts off Instagram &mdash; three ways to do it</div>
+    </div>
+    <p class="thesis">
+      The collector is the one part of the pipeline that touches Instagram.
+      Everything else is ours. This is where cost, risk and reliability are decided.
+    </p>
+    <div class="meta">
+      <span>Platform <b>Instagram</b></span>
+      <span>Costed at <b>~1,700 posts / day</b></span>
+      <span>Prices checked <b>27 Aug 2026</b></span>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <section>
+    <div class="col">
+      <p class="eyebrow">The pipeline</p>
+      <h2>Five steps, one that talks to Instagram</h2>
+      <p>
+        SOLD turns a list of search terms into a feed of verified Australian property
+        listings. The <strong>collector</strong> is the only step that has to get past
+        Instagram; the other four run on our own machines.
+      </p>
+    </div>
+
+    <figure>
+      <div class="figure-frame">
+        <svg viewBox="0 0 880 250" role="img" aria-label="Pipeline diagram: seed terms flow into the collector, which emits posts, which the detector turns into verified listings. The collector box is highlighted, with three interchangeable options listed beneath it.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+            <marker id="ar-sold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="f-sold"/>
+            </marker>
+          </defs>
+
+          <!-- Instagram band -->
+          <rect x="176" y="12" width="176" height="76" rx="4" class="wash"/>
+          <text x="264" y="26" text-anchor="middle" font-size="9" letter-spacing="1.5" class="f-sold" font-weight="600">TOUCHES INSTAGRAM</text>
+
+          <!-- boxes -->
+          <rect x="20"  y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="85"  y="64" text-anchor="middle" font-size="12" font-weight="600">Seed terms</text>
+
+          <rect x="198" y="40" width="132" height="40" rx="3" fill="none" class="s-sold" stroke-width="2.5"/>
+          <text x="264" y="64" text-anchor="middle" font-size="12" font-weight="700" class="f-sold">Collector</text>
+
+          <rect x="378" y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="443" y="64" text-anchor="middle" font-size="12" font-weight="600">Posts</text>
+
+          <rect x="556" y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="621" y="64" text-anchor="middle" font-size="12" font-weight="600">Detector</text>
+
+          <rect x="734" y="40" width="130" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="799" y="59" text-anchor="middle" font-size="12" font-weight="600">Verified</text>
+          <text x="799" y="72" text-anchor="middle" font-size="12" font-weight="600">listing</text>
+
+          <!-- arrows -->
+          <line x1="150" y1="60" x2="196" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="330" y1="60" x2="376" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="508" y1="60" x2="554" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="686" y1="60" x2="732" y2="60" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+
+          <!-- captions under boxes -->
+          <text x="85"  y="100" text-anchor="middle" font-size="9.5" class="f-slate">29 hashtags + keywords</text>
+          <text x="443" y="100" text-anchor="middle" font-size="9.5" class="f-slate">caption, author, date, image</text>
+          <text x="621" y="100" text-anchor="middle" font-size="9.5" class="f-slate">Claude reads each post</text>
+          <text x="799" y="100" text-anchor="middle" font-size="9.5" class="f-slate">real listing, in Australia</text>
+
+          <!-- swap rail -->
+          <line x1="264" y1="88" x2="264" y2="128" class="s-sold" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ar-sold)"/>
+          <text x="274" y="112" font-size="9.5" class="f-sold">pick one &mdash; swappable</text>
+
+          <!-- three options -->
+          <rect x="60" y="134" width="240" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="72" y="151" font-size="11" font-weight="600">1 &middot; Burner account pool</text>
+          <text x="72" y="166" font-size="9.5" class="f-slate">our accounts, Instagram's web API</text>
+
+          <rect x="320" y="134" width="240" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="332" y="151" font-size="11" font-weight="600">2 &middot; Third-party vendor API</text>
+          <text x="332" y="166" font-size="9.5" class="f-slate">pay someone else to fetch</text>
+
+          <rect x="580" y="134" width="240" height="40" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <text x="592" y="151" font-size="11" font-weight="600">3 &middot; Claude drives a browser</text>
+          <text x="592" y="166" font-size="9.5" class="f-slate">an AI agent reads the page</text>
+
+          <!-- invariant -->
+          <line x1="60" y1="200" x2="820" y2="200" stroke="currentColor" stroke-width="1" stroke-dasharray="2 4" opacity="0.35"/>
+          <text x="440" y="222" text-anchor="middle" font-size="9.5" class="f-slate">All three hand the same post shape to the detector. Switching is a config change, not a rewrite.</text>
+        </svg>
+      </div>
+      <figcaption>
+        Detection costs the same whichever collector we choose: ~$0.01 per post on Claude Sonnet 5,
+        measured from our own runs.
+      </figcaption>
+    </figure>
+
+    <div class="callout">
+      <p class="eyebrow">Where we are today</p>
+      <p>
+        We run <strong>option 1 with a single hand-pasted account</strong>, no pool, no proxies.
+        One rate-limit stops the whole run. It works, and it is the fragile version of the
+        cheapest option.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section>
+    <div class="col">
+      <p class="eyebrow">The three options</p>
+      <h2>Same input, same output, very different bills</h2>
+    </div>
+
+    <div class="options">
+
+      <!-- ---------- option 1 ---------- -->
+      <article class="option">
+        <header>
+          <span class="num">OPTION 1</span>
+          <h3>Burner account pool</h3>
+          <span class="pill good">Cheapest</span>
+          <span class="pill bad">ToS breach</span>
+        </header>
+        <p class="oneline">We own a handful of throwaway Instagram accounts and rotate through them; when one is blocked, the next one takes over automatically.</p>
+        <div class="grid">
+          <div class="cell">
+            <h4>How it works</h4>
+            <ul>
+              <li>Log in as a burner account, keep its cookies.</li>
+              <li>Call the same web endpoints the Instagram website uses.</li>
+              <li>Pool of ~10 accounts, each behind its own residential IP.</li>
+              <li>Blocked or challenged &rarr; mark dead, pick the next, keep going.</li>
+            </ul>
+          </div>
+          <div class="cell">
+            <h4>What you get</h4>
+            <ul>
+              <li>Newest-first hashtag results, so we know when we've caught up.</li>
+              <li>Results within minutes of posting.</li>
+              <li>Everything a logged-in user can see.</li>
+            </ul>
+          </div>
+          <div class="cell">
+            <h4>What it costs</h4>
+            <p><strong>$10&ndash;40 a month.</strong> Accounts are free to create, or ~$0.40&ndash;$3 each to buy pre-aged (they survive longer); proxy traffic is about 1&nbsp;GB/month at $4&ndash;8/GB. The real cost is engineering time keeping it alive.</p>
+          </div>
+          <div class="cell">
+            <h4>What can go wrong</h4>
+            <ul>
+              <li>Breaches Instagram's Terms of Use. Meta has sued scrapers.</li>
+              <li>Accounts die; expect to replace ~25% a month.</li>
+              <li>Instagram changes an endpoint &rarr; we're blind until we patch.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- ---------- option 2 ---------- -->
+      <article class="option">
+        <header>
+          <span class="num">OPTION 2</span>
+          <h3>Third-party vendor API</h3>
+          <span class="pill good">Lowest risk</span>
+          <span class="pill mid">Pay per post</span>
+        </header>
+        <p class="oneline">A scraping vendor runs the accounts, proxies and blocking games; we send a hashtag, they send back posts, we pay per result.</p>
+        <div class="grid">
+          <div class="cell">
+            <h4>How it works</h4>
+            <ul>
+              <li>One HTTPS call per search term to the vendor.</li>
+              <li>Vendor returns posts as clean JSON.</li>
+              <li>No accounts, no cookies, no proxies on our side.</li>
+            </ul>
+          </div>
+          <div class="cell">
+            <h4>What you get</h4>
+            <ul>
+              <li>Reliability is the vendor's problem, with an SLA.</li>
+              <li>Fastest to build &mdash; the adapter is a few days' work.</li>
+              <li>Coverage depends on the vendor's product; "newest first" is not guaranteed everywhere.</li>
+            </ul>
+          </div>
+          <div class="cell">
+            <h4>What it costs</h4>
+            <p><strong>$1.50&ndash;$2.30 per 1,000 posts</strong> at Bright Data or Apify &mdash; about $75&ndash;115/month for us. HikerAPI, a smaller Instagram-only vendor, charges per request and comes in under $50.</p>
+          </div>
+          <div class="cell">
+            <h4>What can go wrong</h4>
+            <ul>
+              <li>Vendor lock-in and price rises.</li>
+              <li>Freshness is theirs to decide &mdash; minutes to hours.</li>
+              <li>The vendor is doing the scraping; the legal exposure is theirs, not zero.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- ---------- option 3 ---------- -->
+      <article class="option">
+        <header>
+          <span class="num">OPTION 3</span>
+          <h3>Claude drives a browser</h3>
+          <span class="pill bad">Most expensive</span>
+          <span class="pill bad">ToS breach</span>
+        </header>
+        <p class="oneline">A real browser opens Instagram, and Claude reads the page and decides what to click &mdash; like a person doing the job, only automated.</p>
+        <div class="grid">
+          <div class="cell">
+            <h4>How it works</h4>
+            <ul>
+              <li>Headless browser (Playwright) logged in as one of our accounts.</li>
+              <li>Claude reads the page structure &mdash; not screenshots &mdash; and extracts each post.</li>
+              <li>Hashtag grids show only thumbnails, so it must open every post.</li>
+            </ul>
+          </div>
+          <div class="cell">
+            <h4>What you get</h4>
+            <ul>
+              <li>Survives Instagram changing its private endpoints &mdash; it reads what a human sees.</li>
+              <li>Can handle odd layouts and pop-ups without a code change.</li>
+            </ul>
+          </div>
+          <div class="cell">
+            <h4>What it costs</h4>
+            <p><strong>About 6&cent; a post</strong> on Sonnet 5 (~2 model calls per post), so roughly $3,000/month at our volume. Haiku 4.5 halves it; screenshot-based control multiplies it 3&ndash;5&times;.</p>
+          </div>
+          <div class="cell">
+            <h4>What can go wrong</h4>
+            <ul>
+              <li>Still needs a logged-in account &mdash; inherits every risk of option 1.</li>
+              <li>Slowest by far: seconds per post, not milliseconds.</li>
+              <li>Cost drifts with the page and the prompt; needs constant monitoring.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section>
+    <div class="col">
+      <p class="eyebrow">Scorecard</p>
+      <h2>Seven things that matter, side by side</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>1 &middot; Burner pool</th>
+            <th>2 &middot; Vendor API</th>
+            <th>3 &middot; Claude browser</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="lbl">Cost</td>
+            <td><span class="pill good">$10&ndash;40 / mo</span></td>
+            <td><span class="pill good">$2&ndash;115 / mo</span></td>
+            <td><span class="pill bad">~$3,000 / mo</span></td>
+          </tr>
+          <tr>
+            <td class="lbl">Time to build</td>
+            <td><span class="pill mid">1&ndash;2 weeks</span><span class="sub">pool + rotation on top of what exists</span></td>
+            <td><span class="pill good">2&ndash;4 days</span><span class="sub">one adapter, slot already exists</span></td>
+            <td><span class="pill mid">1&ndash;2 weeks</span><span class="sub">plus ongoing prompt tuning</span></td>
+          </tr>
+          <tr>
+            <td class="lbl">Reliability</td>
+            <td><span class="pill mid">Bans, throttles</span><span class="sub">pool absorbs, doesn't remove</span></td>
+            <td><span class="pill good">Vendor's problem</span></td>
+            <td><span class="pill mid">Slow, brittle</span><span class="sub">plus option 1's bans</span></td>
+          </tr>
+          <tr>
+            <td class="lbl">Coverage</td>
+            <td><span class="pill good">Full</span><span class="sub">newest-first hashtags work</span></td>
+            <td><span class="pill mid">Vendor-dependent</span><span class="sub">Bright Data and HikerAPI list hashtag feeds; verify "newest first"</span></td>
+            <td><span class="pill good">Full</span><span class="sub">whatever a user sees</span></td>
+          </tr>
+          <tr>
+            <td class="lbl">Freshness</td>
+            <td><span class="pill good">Minutes</span></td>
+            <td><span class="pill mid">Minutes&ndash;hours</span></td>
+            <td><span class="pill mid">Slow crawl</span></td>
+          </tr>
+          <tr>
+            <td class="lbl">Legal / ToS</td>
+            <td><span class="pill bad">Breach</span><span class="sub">Meta litigates; burners only make it cheaper</span></td>
+            <td><span class="pill good">Transferred</span><span class="sub">vendor carries it</span></td>
+            <td><span class="pill bad">Breach</span><span class="sub">same as option 1</span></td>
+          </tr>
+          <tr>
+            <td class="lbl">Maintenance</td>
+            <td><span class="pill mid">Ongoing</span><span class="sub">endpoint drift, account churn</span></td>
+            <td><span class="pill good">Low</span></td>
+            <td><span class="pill mid">Ongoing</span><span class="sub">prompt drift, cost watch</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section>
+    <div class="col">
+      <p class="eyebrow">Cost</p>
+      <h2>Monthly bill at ~50,000 posts</h2>
+      <p>
+        One full sweep a day of our 29 terms, 60 posts each. Double every line if we sweep twice daily.
+        Detection is the same for all three.
+      </p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Option</th>
+            <th class="num">Collect / post</th>
+            <th class="num">Collect / month</th>
+            <th class="num">Detect / month</th>
+            <th class="num">All-in / month</th>
+          </tr>
+        </thead>
+        <tbody id="cost-rows">
+          <tr>
+            <td class="lbl">1 &middot; Burner pool<span class="sub">10 accounts + proxies</span></td>
+            <td class="num">&asymp; $0.00</td>
+            <td class="num">$10&ndash;40</td>
+            <td class="num">$520</td>
+            <td class="num"><strong>$530&ndash;560</strong></td>
+          </tr>
+          <tr>
+            <td class="lbl">2 &middot; HikerAPI<span class="sub">$100 one-off deposit, ~$0.001/request</span></td>
+            <td class="num">$0.0001&ndash;0.001</td>
+            <td class="num">$2&ndash;50</td>
+            <td class="num">$520</td>
+            <td class="num"><strong>$520&ndash;570</strong></td>
+          </tr>
+          <tr>
+            <td class="lbl">2 &middot; Bright Data<span class="sub">$1.50 per 1,000, pay-as-you-go</span></td>
+            <td class="num">$0.0015</td>
+            <td class="num">$75</td>
+            <td class="num">$520</td>
+            <td class="num"><strong>$595</strong></td>
+          </tr>
+          <tr>
+            <td class="lbl">2 &middot; Apify<span class="sub">$2.30 per 1,000 on the $29 Starter plan</span></td>
+            <td class="num">$0.0023</td>
+            <td class="num">$115</td>
+            <td class="num">$520</td>
+            <td class="num"><strong>$635</strong></td>
+          </tr>
+          <tr class="total">
+            <td class="lbl">3 &middot; Claude browser<span class="sub">Sonnet 5, ~2 calls per post</span></td>
+            <td class="num">$0.06</td>
+            <td class="num">$3,000</td>
+            <td class="num">$520</td>
+            <td class="num"><strong>$3,520</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout signal">
+      <p class="eyebrow">Read this line</p>
+      <p>
+        Detection, not collection, is the biggest line for options 1 and 2 &mdash; so engineering time and legal
+        risk decide between them, not the bill. Option 3's collection cost alone is more each month than
+        option 2 costs in a year.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section>
+    <div class="col">
+      <p class="eyebrow">Recommendation</p>
+      <h2>Phase it: burner pool now, vendor API for production</h2>
+      <p>
+        We are still proving there is enough supply to build a product on. Spend nothing on
+        collection until that's answered; then pay a vendor to make the risk go away.
+      </p>
+    </div>
+
+    <div class="phases">
+      <div class="phase">
+        <p class="eyebrow">Phase 1 &middot; now</p>
+        <h3>Harden option 1</h3>
+        <p>Add the account pool, per-account proxy, and automatic fallback. Finish the first full sweep of all 29 terms.</p>
+        <p class="trigger">Exit when: we know posts/day and listings/day for real.</p>
+      </div>
+      <div class="phase">
+        <p class="eyebrow">Phase 2 &middot; if supply is real</p>
+        <h3>Switch to option 2</h3>
+        <p>Build the vendor adapter (days, not weeks). Retire the burner accounts. Keep option 1 code as the fallback collector.</p>
+        <p class="trigger">Exit when: a paying user depends on the feed.</p>
+      </div>
+      <div class="phase">
+        <p class="eyebrow">Option 3</p>
+        <h3>Keep on the shelf</h3>
+        <p>Worth revisiting only if Instagram breaks the web endpoints and no vendor covers what we need. Not before.</p>
+        <p class="trigger">Trigger: options 1 and 2 both fail.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="eyebrow">Assumptions &amp; sources</p>
+    <ul id="sources">
+      <li>Volume: 29 seed terms &times; 60 posts &times; 1 sweep/day &asymp; 1,700 posts/day &asymp; 50,000/month.</li>
+      <li>Detection: $1.10 across 105 detections in our database &asymp; $0.0104/post, Claude Sonnet 5, prompt v2.</li>
+      <li>Option 1: 10 aged accounts, ~25%/month replaced, residential proxies; ~85 pages/day &times; ~150 KB &asymp; 0.4 GB/month.</li>
+      <li>Option 3: ~2 model calls per post &times; ~10k input tokens; Sonnet 5 at $2 / $10 per million input / output tokens; Haiku 4.5 at $1 / $5.</li>
+      <li>Apify: Instagram Hashtag Scraper $2.30/1k results on Starter ($29/mo credit, overage pay-as-you-go) &mdash; <a href="https://apify.com/apify/instagram-hashtag-scraper">apify.com</a>, <a href="https://apify.com/pricing">pricing</a>.</li>
+      <li>Bright Data: Instagram Web Scraper API $1.50/1k records, no minimum; 5,000 free/month &mdash; <a href="https://brightdata.com/products/web-scraper/instagram">brightdata.com</a>.</li>
+      <li>HikerAPI: $0.001/request after a $100 deposit ($0.02 on the $20 tier); posts per request not documented, assumed ~27 &mdash; <a href="https://hikerapi.com/pricing">hikerapi.com</a>. Range shown covers 1&ndash;27 posts per request.</li>
+      <li>Residential proxies: Decodo $3.50&ndash;4/GB, IPRoyal $5.50&ndash;7.35/GB, Bright Data $8/GB &mdash; <a href="https://decodo.com/proxies/residential-proxies/pricing">decodo.com</a>, <a href="https://iproyal.com/residential-proxies/">iproyal.com</a>.</li>
+      <li>Aged accounts: $0.36&ndash;$3 bulk auto-registered, $5&ndash;20 hand-verified &mdash; grey-market vendors, stock quality unverified.</li>
+      <li>Instagram removed logged-out hashtag and keyword browsing in 2024; every option needs a logged-in session somewhere &mdash; <a href="https://scrapfly.io/blog/posts/how-to-scrape-instagram">scrapfly.io</a> (Aug 2026).</li>
+      <li>All prices checked 27 Aug 2026, USD, list price, before tax.</li>
+    </ul>
+  </footer>
+
+</div>
